@@ -1,0 +1,41 @@
+* {
+	margin:0px;
+	padding:0px;
+
+}
+
+html, body {
+	height:100%;
+}
+
+form {
+	text-align: center;
+}
+
+form#form-join {
+	display:none;
+}
+
+input {
+	border:none;
+	border-bottom:1px solid #75706b;
+
+}
+
+
+
+
+::-webkit-input-placeholder { /* WebKit browsers */
+    color:    #75706b;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color:    #999;
+    opacity:  1;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color:    #75706b;
+    opacity:  1;
+}
+:-ms-input-placeholder { /* Internet Explorer 10+ */
+    color:    #75706b;
+}

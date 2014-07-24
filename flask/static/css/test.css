@@ -1,0 +1,14 @@
+
+div.panel-body {
+	padding:0px;
+}
+
+textarea.form-control {
+	resize:vertical;
+	border:none;
+	box-shadow:none;
+}
+
+form button[type=submit] {
+	margin-bottom:20px;
+}

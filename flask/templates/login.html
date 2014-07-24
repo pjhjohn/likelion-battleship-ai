@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>SIGN IN</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+	<script src="{{ url_for('static', filename='js/lib/jquery-1.11.1.min.js') }}"></script>
+	
+</head>
+<body>
+	<form id="form-login" action="login_submit" method="POST">
+		<input type="email" name="email" placeholder="EMAIL" autofocus required>
+		<br>
+		<input type="password" name="password" placeholder="PASSWORD" required>
+		<br>
+		<button type="submit">SIGN IN</button>
+		<br>
+		<a href="#" id="btn-sign-up">Sign Up</a>
+	</form>
+	<form action="join_submit" id="form-join" method="POST">
+		<input type="email" name="email" placeholder="EMAIL" autofocus required>
+		<br>
+		<input type="password" name="password" placeholder="PASSWORD" required>
+		<br>
+		<input type="password" name="password-confirm" placeholder="PASSWORD CONFIRM" required>
+		<br>
+		<select name="school">
+		{% for school in schoolList %}	
+			<option value="{{ school['ID'] }}">{{ school['schoolName'].decode('utf8') }}</option>
+
+		{% endfor %}
+
+		</select>
+		<br>
+		<button type="submit">SIGN UP</button>
+		<br>
+		<a id="btn-sign-in" href="#">Sign In</a>
+
+	</form>
+
+
+
+	<script src="{{ url_for('static', filename='js/lib/jsencrypt.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/lib/toast.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>
