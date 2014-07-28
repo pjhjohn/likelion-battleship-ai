@@ -33,13 +33,15 @@ class Board:
         guess : (dic) guess location
         """
         if ( guess['x'] > 9 or guess['x'] < 0 ) or ( guess['y'] > 9 or guess['y'] < 0 ):
-            print "Player%d, invalid guess" %(player,guess['x'],guess['y'])
+            print "Player%d, invalid guess (%d,%d)" %(player,guess['x'],guess['y'])
+            raise error("Your guess is out of the board.")
             return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":-2, "sink":None}
 
         else:
             coordinate = self.board[ guess['y'] ][ guess['x'] ]
             if coordinate < 0:
                 print "Player%d, guessed already (%d,%d)" %(player,guess['x'],guess['y'])
+                raise error("You already guessed.") 
                 return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":-1, "sink":None}
 
             elif coordinate == 0:
@@ -60,9 +62,9 @@ class Board:
                     print "Player%d, Ship size %d has sank. (%d,%d)" % (player, self.battleships[ ( hit_ship_id - 1) ].size, guess['x'], guess['y'])
                     if self.remaining == 0:
                         self.win()
-                        return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":2, "sink":hit_ship_id}
+                        return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":3, "sink":hit_ship_id}
                     else:
-                        return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":1, "sink":hit_ship_id}
+                        return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":2, "sink":hit_ship_id}
 
                 else:
                     print "Player%d, Hit Ship%d! (%d, %d)" %(player, hit_ship_id, guess['x'], guess['y'])

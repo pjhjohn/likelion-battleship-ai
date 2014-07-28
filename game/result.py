@@ -1,32 +1,53 @@
 class Result:
     """
-
+    keys in history element
+    "guess" : (dict) x, y coordinate {"x":, "y":}
+    "result" : (int) guess result -2 ~ 3
+    "sink" : (int) sank ship_id
     """
     def __init__( self, board ):
         self.board = board
         self.history = []
 
+    def get_last_result(self):
+        if len(self.history) > 0:
+            return self.history[len(self.history)-1]
+        else:
+            return {}
+
     def get_history( self, last_count ):
         history_count = len(self.history)
         if history_count < last_count :
-            return None
+            return {}
         else:
-            return self.history.pop( (history_count - last_count) )
+            return self.history[(history_count - last_count)]
 
     def get_board( self ):
         return self.board
 
     def get_coordinate( self, x, y ):
-        return self.board[y][x]
+        return int(self.board[y][x])
 
     def get_remaining_ships( self ):
-        pass
+        remaining = [1, 2, 3, 4, 5]
+        for result in self.history:
+            if result["result"] == 2:
+                remaining.remove(result["sink"])
+        return remaining
 
     def get_sank_locations_and_ships_info( self ):
-        pass
+        sink = []
+        for result in self.history:
+            if result["result"] == 2:
+                sink.append({"location":result["guess"], "sink":result["sink"]})
+        return sink
 
     def get_sank_location_by_ship_id( self, ship_id ):
-        pass
+        for result in self.history:
+            if result["sink"] == ship_id:
+                return result["guess"]
+        else:
+            {}
 
     def update_board( self, board ):
         self.board = board
