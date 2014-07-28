@@ -24,6 +24,6 @@ def guess_helper(result):
     while board[y][x] < 0:
         x = random.randint(0,9)
         y = random.randint(0,9)
-    #---------------
+    #----------------
 
     return guess(x,y)
