@@ -13,7 +13,7 @@ class Board:
         for battleship in battleships:
             for coordinate in battleship.coordinates:
                 if self.board[ coordinate['y'] ][ coordinate['x'] ] > 0 :
-                    print "battleships overlap!"
+                    raise ValueError("battleships overlap at (%d,%d)! %(coordinate['x'],coordinate['y'])")
                 else:
                     self.board[ coordinate['y'] ][ coordinate['x'] ] = battleship.ship_id # change occupied tile to 1
 
@@ -34,14 +34,14 @@ class Board:
         """
         if ( guess['x'] > 9 or guess['x'] < 0 ) or ( guess['y'] > 9 or guess['y'] < 0 ):
             print "Player%d, invalid guess (%d,%d)" %(player,guess['x'],guess['y'])
-            raise error("Your guess is out of the board.")
+            raise ValueError("Your guess (%d,%d) is out of the board." %(guess['x'],guess['y']))
             return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":-2, "sink":None}
 
         else:
             coordinate = self.board[ guess['y'] ][ guess['x'] ]
             if coordinate < 0:
                 print "Player%d, guessed already (%d,%d)" %(player,guess['x'],guess['y'])
-                raise error("You already guessed.") 
+                raise ValueError("You already guessed (%d,%d)." %(guess['x'],guess['y'])) 
                 return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":-1, "sink":None}
 
             elif coordinate == 0:

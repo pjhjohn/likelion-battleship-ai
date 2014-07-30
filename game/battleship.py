@@ -11,13 +11,18 @@ class Battleship:
         self.ship_id = ship_id
 
         coordinates = []
-        
+
         if direction == 'x' or direction == 'y':
             coordinates.append(dict(location))
             for i in range(0, size-1):
                 location[ direction ] += 1
+
+                if location[direction] > 9:
+                    raise ValueError("Battleship #%d location out of bound." %self.ship_id)
+
                 coordinates.append(dict(location))
         else:
-            print "wrong direction!"
+            raise ValueError("Invalid Direction")
+
 
         self.coordinates = coordinates # list of coordinates that the battleship occupies

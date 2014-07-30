@@ -9,19 +9,35 @@ from log import Log
 # battleships2 = [{"location":{"x":1,"y":1},"size":2,"direction":"x"},{"location":{"x":4,"y":2},"size":4,"direction":"y"},{"location":{"x":7,"y":3},"size":3,"direction":"x"},{"location":{"x":2,"y":4},"size":3,"direction":"y"},{"location":{"x":5,"y":7},"size":5,"direction":"x"}]
 
 # ai1 = "ai"
-# ai2 = "ai"
+# ai2 = "ai_test"
 
 def make_fleet(battleships):
     battleships.sort(key=operator.itemgetter("size"))
     
     fleet = []
+    size = [2,3,3,4,5]
     size3_id = [2,3]
+
     for bs in battleships:
         if bs["size"] == 3:
+            try:
+                size.remove(3)
+            except:
+                raise ValueError("There are more than two size 3 battleships.")
             fleet.append(Battleship(bs["size"],bs["direction"],bs["location"], size3_id.pop(0)))
+
         elif bs["size"] == 2:
+            try:
+                size.remove(2)
+            except:
+                raise ValueError("There are more than one size 2 battleship.")
             fleet.append(Battleship(bs["size"],bs["direction"],bs["location"], 1))
+
         else:
+            try:
+                size.remove(bs["size"])
+            except:
+                raise ValueError("There are more than one size %d battleship." %bs["size"])
             fleet.append(Battleship(bs["size"],bs["direction"],bs["location"], bs["size"]))
     return fleet
 
@@ -48,7 +64,7 @@ def convert_board(board):
                 board_copy[row][col] = 0
     return board_copy
 
-def main( battleships1, battleships2, ai1, ai2 ):
+def game( battleships1, battleships2, ai1, ai2 ):
 
     log = Log()
 
@@ -74,7 +90,7 @@ def main( battleships1, battleships2, ai1, ai2 ):
         while hit1 > 0:
             turn1 += 1
             print "Turn %d" %turn1
-            last_result = gb1.hit(1, ai1.guess_helper(results1))
+            last_result = gb1.hit(1, ai1.guess_helper(ai1.guess(results1),results1))
             log.history.append(last_result)
             results1.update_board(convert_board(gb1.board)) 
             print last_result
@@ -92,7 +108,7 @@ def main( battleships1, battleships2, ai1, ai2 ):
         while hit2 > 0:
             turn2 += 1
             print "Turn %d" %turn2
-            last_result = gb2.hit(2, ai2.guess_helper(results2))
+            last_result = gb2.hit(2, ai2.guess_helper(ai2.guess(results2),results2))
             log.history.append(last_result)
             results2.update_board(convert_board(gb2.board))
             print last_result
@@ -116,4 +132,4 @@ def main( battleships1, battleships2, ai1, ai2 ):
 
     return log.get_log()
     
-# main(battleships1, battleships2, ai1, ai2)
+# game(battleships1, battleships2, ai1, ai2)
