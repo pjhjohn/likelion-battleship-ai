@@ -4,12 +4,24 @@ from battleship import Battleship
 from importlib import import_module
 from result import Result
 from log import Log
+import const as constant
 
-# battleships1 = [{"location":{"x":1,"y":1},"size":2,"direction":"x"},{"location":{"x":4,"y":2},"size":4,"direction":"y"},{"location":{"x":7,"y":3},"size":3,"direction":"x"},{"location":{"x":2,"y":4},"size":3,"direction":"y"},{"location":{"x":5,"y":7},"size":5,"direction":"x"}]
-# battleships2 = [{"location":{"x":1,"y":1},"size":2,"direction":"x"},{"location":{"x":4,"y":2},"size":4,"direction":"y"},{"location":{"x":7,"y":3},"size":3,"direction":"x"},{"location":{"x":2,"y":4},"size":3,"direction":"y"},{"location":{"x":5,"y":7},"size":5,"direction":"x"}]
+constant.STATUS_MISSED  = -2
+constant.STATUS_HIT     = -1
+constant.STATUS_EMPTY   = 0
 
-# ai1 = "ai"
-# ai2 = "ai_test"
+constant.RESULT_INVALID = -2
+constant.RESULT_TWICE   = -1
+constant.RESULT_MISSED  = 0
+constant.RESULT_HIT     = 1
+constant.RESULT_SINK    = 2
+constant.RESULT_WIN     = 3
+
+battleships1 = [{"location":{"x":1,"y":1},"size":2,"direction":"x"},{"location":{"x":4,"y":2},"size":4,"direction":"y"},{"location":{"x":7,"y":3},"size":3,"direction":"x"},{"location":{"x":2,"y":4},"size":3,"direction":"y"},{"location":{"x":5,"y":7},"size":5,"direction":"x"}]
+battleships2 = [{"location":{"x":1,"y":1},"size":2,"direction":"x"},{"location":{"x":4,"y":2},"size":4,"direction":"y"},{"location":{"x":7,"y":3},"size":3,"direction":"x"},{"location":{"x":2,"y":4},"size":3,"direction":"y"},{"location":{"x":5,"y":7},"size":5,"direction":"x"}]
+
+ai1 = "ai"
+ai2 = "ai_test"
 
 def make_fleet(battleships):
     battleships.sort(key=operator.itemgetter("size"))
@@ -62,10 +74,16 @@ def convert_board(board):
         for col in range(10):
             if board_copy[row][col] > 0:
                 board_copy[row][col] = 0
+
     return board_copy
 
 def game( battleships1, battleships2, ai1, ai2 ):
-
+    """
+    battleships1 : Player1's list of battleship from front-end
+    battleships2 : Player2's list of battleship from front-end
+    ai1 : Player1's ai file name (+path)
+    ai2 : Player2's ai file name (+path)
+    """
     log = Log()
 
     ai1 = import_module(ai1)
@@ -132,4 +150,4 @@ def game( battleships1, battleships2, ai1, ai2 ):
 
     return log.get_log()
     
-# game(battleships1, battleships2, ai1, ai2)
+print game(battleships1, battleships2, ai1, ai2)

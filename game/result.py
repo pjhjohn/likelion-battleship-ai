@@ -14,7 +14,7 @@ class Result:
         return the last result dict
         """
         if len(self.history) > 0:
-            return self.history[len(self.history)-1]
+            return dict(self.history[len(self.history)-1])
         else:
             return {}
 
@@ -26,13 +26,13 @@ class Result:
         if history_count < last_n :
             return {}
         else:
-            return self.history[(history_count - last_n)]
+            return dict(self.history[(history_count - last_n)])
 
     def get_board( self ):
         """
         return current board status
         """
-        return self.board
+        return list(self.board)
 
     def get_coordinate( self, x, y ):
         """
@@ -68,7 +68,7 @@ class Result:
         """
         for result in self.history:
             if result["sink"] == ship_id:
-                return result["guess"]
+                return dict(result["guess"])
         else:
             {}
 
