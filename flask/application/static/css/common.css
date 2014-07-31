@@ -1,0 +1,7 @@
+.panel-title a[data-toggle="collapse"] {
+	display:block;
+}
+
+.panel-title a[data-toggle="collapse"]:hover {
+	text-decoration: none;
+}

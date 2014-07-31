@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% block head %}
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{% block title %}LIKELION BATTLESHIP{% endblock %}</title>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="{{ url_for('static',filename = 'css/bootstrap.min.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static',filename='css/common.css') }}">
+
+	<script src="{{ url_for('static',filename = 'js/lib/jquery-1.11.1.min.js') }}"></script>
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="{{ url_for('static',filename = 'js/bootstrap.min.js') }}"></script>
+	<script src="{{ url_for('static',filename='js/lib/progress.js') }}"></script>
+	{% endblock %}
+</head>
+<body>
+	{% block header %}
+	<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+		<div class="container">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-main">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="/">BATTLESHIP</a>
+			</div>
+
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class="collapse navbar-collapse" id="navbar-main">
+				<ul class="nav navbar-nav">
+					<li class="{{ 'active' if current == 'code' else '' }}"><a href="code">Code Management</a></li>
+					<li class="{{ 'active' if current == 'test' else '' }}"><a href="test">Code Test</a></li>
+					<li class="{{ 'active' if current == 'ship' else '' }}"><a href="ship">Ship Placement</a></li>
+				</ul>
+				
+				<ul class="nav navbar-nav navbar-right ">
+					{% if 'userlevel' in session and session['userlevel'] > 1 %}
+					<li class="{{ 'active' if current == 'admin' else '' }}"><a href="admin">Admin</a></li>
+					{% endif %}
+					<li><a href="logout">Logout</a></li>
+				</ul>
+				{% block submitcode %}{% endblock %}
+			</div><!-- /.navbar-collapse -->
+		</div><!-- /.container-fluid -->
+	</nav>
+	{% endblock %}
+
+
+	{% block body %}
+
+	{% endblock %}
+
+
+	{% block footer %}
+
+	{% endblock %}
+
+</body>
+</html>
