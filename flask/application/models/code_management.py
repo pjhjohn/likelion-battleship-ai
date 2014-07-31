@@ -1,7 +1,8 @@
 from database import *
 from application.constants import *
-from os import mkdir
+from os import mkdir, remove
 import imp
+
 
 def add_code(userId, code):
     dirpath = UPLOAD_DIR+'/'+str(userId)
@@ -44,15 +45,21 @@ def get_latest_code_file_name(userId):
 # return latest code file as module
 # latest code has only 'guess' function
 def get_latest_code(userId):
-    # add path
-    filePath = os.path.join(os.path.dirname(__file__), get_code_path(userId))
-
-
+    
     # get file name
     fileName = get_latest_code_file_name(userId)
+    with open(CODE_HEADER_FILE_NAME) as codeHeaderFile:
+        codeHeader = codeHeaderFile.read()
+    with open(get_code_path(userId)+fileName+".py") as userCodeFile:
+        userCode = userCodeFile.read()
 
-    userai = imp.load_source('userai',filePath+fileName+".py")
+    tempCode = open(TEMP_CODE_FILE_NAME,'w')
+    tempCode.write(codeHeader+userCode)
+    tempCode.close()
 
+    userai = imp.load_source('userai',TEMP_CODE_FILE_NAME)
     
+    remove(TEMP_CODE_FILE_NAME)
+
     return userai
 

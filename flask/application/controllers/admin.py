@@ -14,7 +14,7 @@ def admin():
         return redirect(url_for('index'))
 
 
-    res = get_users("WHERE schoolId=(SELECT schoolId FROM users WHERE ID = '"+session[KEY_USER_ID]+"')" if int(session[KEY_USER_LEVEL]) < 3 else '')
+    res = get_users("WHERE schoolId=(SELECT schoolId FROM users WHERE ID = '"+str(session[KEY_USER_ID])+"')" if int(session[KEY_USER_LEVEL]) < 3 else '')
     userList = []
     for user in res : 
         user[KEY_MEMBERS] = user[KEY_MEMBERS].decode('utf8')

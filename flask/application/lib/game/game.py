@@ -106,48 +106,47 @@ def game( battleships1, battleships2, ai1, ai2 ):
 
         while hit1 > 0:
             turn1 += 1
-            print "Turn %d" %turn1
+            #print "Turn %d" %turn1
             last_result = gb1.hit(1, ai1.guess_helper(ai1.guess(results1),results1))
             log.history.append(last_result)
             results1.update_board(convert_board(gb1.board)) 
-            print last_result
-            print_board(gb1.board)
+            #print last_result
+            #print_board(gb1.board)
             results1.history.append({"guess":last_result["guess"],"result":last_result["result"],"sink":last_result["sink"]})
             hit1 = last_result["result"]
             if hit1 == 3:
                 break
-            print ""
+            #print ""
 
         if hit1 == 3:
-            print "Player1 Won!"
+            #print "Player1 Won!"
             break
 
         while hit2 > 0:
             turn2 += 1
-            print "Turn %d" %turn2
+            #print "Turn %d" %turn2
             last_result = gb2.hit(2, ai2.guess_helper(ai2.guess(results2),results2))
             log.history.append(last_result)
             results2.update_board(convert_board(gb2.board))
-            print last_result
-            print_board(gb2.board)
+            #print last_result
+            #print_board(gb2.board)
             results2.history.append({"guess":last_result["guess"],"result":last_result["result"],"sink":last_result["sink"]})
             hit2 = last_result["result"]
             if hit2 == 3:
                 break
-            print ""
+            #print ""
 
         if hit2 == 3:
-            print "Player2 Won!"
+            #print "Player2 Won!"
             break
 
-    print_board(gb1.board)
-    print results1.history
-    print ""
-    print_board(gb2.board)
-    print results2.history
-    print log.history
+    #print_board(gb1.board)
+    #print results1.history
+    #print ""
+    #print_board(gb2.board)
+    #print results2.history
 
-    return log.get_log()
+    return log
 
 if __name__ == '__main__':
     ai1 = "ai"
