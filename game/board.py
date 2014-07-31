@@ -21,12 +21,6 @@ class Board:
         for battleship in self.battleships:
             print "ID: %d, Size: %d, Health: %d" %(battleship.ship_id, battleship.size, battleship.health)
 
-    def win(self):  
-        print "You won!"
-
-    def lose(self):
-        print "You lost!"
-
     def hit( self, player, guess ):
         """
         check if guess hit
@@ -34,14 +28,14 @@ class Board:
         """
         if ( guess['x'] > 9 or guess['x'] < 0 ) or ( guess['y'] > 9 or guess['y'] < 0 ):
             print "Player%d, invalid guess (%d,%d)" %(player,guess['x'],guess['y'])
-            raise ValueError("Your guess (%d,%d) is out of the board." %(guess['x'],guess['y']))
+            # raise ValueError("Your guess (%d,%d) is out of the board." %(guess['x'],guess['y']))
             return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":-2, "sink":None}
 
         else:
             coordinate = self.board[ guess['y'] ][ guess['x'] ]
             if coordinate < 0:
                 print "Player%d, guessed already (%d,%d)" %(player,guess['x'],guess['y'])
-                raise ValueError("You already guessed (%d,%d)." %(guess['x'],guess['y'])) 
+                # raise ValueError("You already guessed (%d,%d)." %(guess['x'],guess['y'])) 
                 return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":-1, "sink":None}
 
             elif coordinate == 0:
@@ -61,7 +55,6 @@ class Board:
                 if self.battleships[ ( hit_ship_id - 1 ) ].health == 0:
                     print "Player%d, Ship size %d has sank. (%d,%d)" % (player, self.battleships[ ( hit_ship_id - 1) ].size, guess['x'], guess['y'])
                     if self.remaining == 0:
-                        self.win()
                         return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":3, "sink":hit_ship_id}
                     else:
                         return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":2, "sink":hit_ship_id}
