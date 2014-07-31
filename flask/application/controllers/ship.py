@@ -27,11 +27,11 @@ def ship():
                 else :
                     activePositions.append((startRow+l,startCol))
 
-        bs = BS('<table class="ship-placement"></table>')
+        bs = BS('<table class="ship-placement"></table>','html.parser')
         for j in range(10):
-            row = BS('<tr data-row="'+str(j)+'"></tr>')
+            row = BS('<tr data-row="'+str(j)+'"></tr>','html.parser')
             for k in range(10):
-                row.tr.append(BS('<td data-col="'+str(k)+'" '+('class="placed"' if (j,k) in activePositions else '')+'></td>'))
+                row.tr.append(BS('<td data-col="'+str(k)+'" '+('class="placed"' if (j,k) in activePositions else '')+'></td>','html.parser'))
             bs.table.append(row)
 
         res[i]['placement'] = str(bs)
