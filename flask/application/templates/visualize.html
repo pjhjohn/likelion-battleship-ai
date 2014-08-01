@@ -340,11 +340,10 @@
 		var player2 = [];
 
 		for (var i=0; i<5; i++){
-			player1[i] = new Ship(board_2[i].location.x, board_2[i].location.y, board_2[i].size, board_2[i].direction);
-			player2[i] = new Ship(board_1[i].location.x, board_1[i].location.y, board_1[i].size, board_1[i].direction)
+			player2[i] = new Ship(board_2[i].location.x, board_2[i].location.y, board_2[i].size, board_2[i].direction);
+			player1[i] = new Ship(board_1[i].location.x, board_1[i].location.y, board_1[i].size, board_1[i].direction)
 		}
-		console.log(player1);
-		console.log(player2);
+		
 
 		init();
 		animate();
@@ -563,14 +562,14 @@
 					$('#loadContents').fadeOut(1000);
 					$(document).keydown(function(e){
 						if(e.keyCode == '32'){
-							console.log(logs[logNum]);
-							var player = logs[logNum].player;
-							console.log(player);
+							//console.log(logs[logNum]);
+							var player = (logs[logNum].player == 1? 2:1);
+							//console.log(player);
 
 							if(logs[logNum].result > 0){
 								bombX = logs[logNum].guess.x + 1;
 								bombZ = logs[logNum].guess.y + 1;
-								bombPlayer = logs[logNum].player;
+								bombPlayer = player;
 								makeBomb(bombX, bombZ, player);
 								bombTime = 1;
 								changeBoardColor(logs[logNum].guess.x + 1, logs[logNum].guess.y + 1,'red',player);
