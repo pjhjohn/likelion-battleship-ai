@@ -1,794 +1,635 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Battleship</title>
-  </head>
-  <body>
-    <div id="container"></div>
-  </body>
-
-  <script src="{{ url_for('static',filename='visualize/js/three.min.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static',filename='visualize/js/OBJLoader.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static',filename='visualize/js/jquery-1.10.2.min.js') }}"></script>
-  <script type="x-shader/x-vertex" id="vertexShader">
-    vec3 mod289(vec3 x)
-    {
-      return x - floor(x * (1.0 / 289.0)) * 289.0;
-    }
-
-    vec4 mod289(vec4 x)
-    {
-      return x - floor(x * (1.0 / 289.0)) * 289.0;
-    }
-
-    vec4 permute(vec4 x)
-    {
-      return mod289(((x*34.0)+1.0)*x);
-    }
-
-    vec4 taylorInvSqrt(vec4 r)
-    {
-      return 1.79284291400159 - 0.85373472095314 * r;
-    }
-
-    vec3 fade(vec3 t) {
-      return t*t*t*(t*(t*6.0-15.0)+10.0);
-    }
-
-    // Classic Perlin noise
-    float cnoise(vec3 P)
-    {
-      vec3 Pi0 = floor(P); // Integer part for indexing
-      vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
-      Pi0 = mod289(Pi0);
-      Pi1 = mod289(Pi1);
-      vec3 Pf0 = fract(P); // Fractional part for interpolation
-      vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
-      vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
-      vec4 iy = vec4(Pi0.yy, Pi1.yy);
-      vec4 iz0 = Pi0.zzzz;
-      vec4 iz1 = Pi1.zzzz;
-
-      vec4 ixy = permute(permute(ix) + iy);
-      vec4 ixy0 = permute(ixy + iz0);
-        vec4 ixy1 = permute(ixy + iz1);
-
-      vec4 gx0 = ixy0 * (1.0 / 7.0);
-      vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
-      gx0 = fract(gx0);
-      vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
-      vec4 sz0 = step(gz0, vec4(0.0));
-      gx0 -= sz0 * (step(0.0, gx0) - 0.5);
-      gy0 -= sz0 * (step(0.0, gy0) - 0.5);
-
-      vec4 gx1 = ixy1 * (1.0 / 7.0);
-      vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
-      gx1 = fract(gx1);
-      vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
-      vec4 sz1 = step(gz1, vec4(0.0));
-      gx1 -= sz1 * (step(0.0, gx1) - 0.5);
-      gy1 -= sz1 * (step(0.0, gy1) - 0.5);
-
-      vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
-      vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
-      vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
-      vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
-      vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
-      vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
-      vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
-      vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
-
-      vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
-      g000 *= norm0.x;
-      g010 *= norm0.y;
-      g100 *= norm0.z;
-      g110 *= norm0.w;
-      vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
-      g001 *= norm1.x;
-      g011 *= norm1.y;
-      g101 *= norm1.z;
-      g111 *= norm1.w;
-
-      float n000 = dot(g000, Pf0);
-      float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
-      float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
-      float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
-      float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
-      float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
-      float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
-      float n111 = dot(g111, Pf1);
-
-      vec3 fade_xyz = fade(Pf0);
-      vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
-      vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-      float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
-      return 2.2 * n_xyz;
-    }
-
-    // Classic Perlin noise, periodic variant
-    float pnoise(vec3 P, vec3 rep)
-    {
-      vec3 Pi0 = mod(floor(P), rep); // Integer part, modulo period
-      vec3 Pi1 = mod(Pi0 + vec3(1.0), rep); // Integer part + 1, mod period
-      Pi0 = mod289(Pi0);
-      Pi1 = mod289(Pi1);
-      vec3 Pf0 = fract(P); // Fractional part for interpolation
-      vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
-      vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
-      vec4 iy = vec4(Pi0.yy, Pi1.yy);
-      vec4 iz0 = Pi0.zzzz;
-      vec4 iz1 = Pi1.zzzz;
-
-      vec4 ixy = permute(permute(ix) + iy);
-      vec4 ixy0 = permute(ixy + iz0);
-      vec4 ixy1 = permute(ixy + iz1);
-
-      vec4 gx0 = ixy0 * (1.0 / 7.0);
-      vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
-      gx0 = fract(gx0);
-      vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
-      vec4 sz0 = step(gz0, vec4(0.0));
-      gx0 -= sz0 * (step(0.0, gx0) - 0.5);
-      gy0 -= sz0 * (step(0.0, gy0) - 0.5);
-
-      vec4 gx1 = ixy1 * (1.0 / 7.0);
-      vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
-      gx1 = fract(gx1);
-      vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
-      vec4 sz1 = step(gz1, vec4(0.0));
-      gx1 -= sz1 * (step(0.0, gx1) - 0.5);
-      gy1 -= sz1 * (step(0.0, gy1) - 0.5);
-
-      vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
-      vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
-      vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
-      vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
-      vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
-      vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
-      vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
-      vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
-
-      vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
-      g000 *= norm0.x;
-      g010 *= norm0.y;
-      g100 *= norm0.z;
-      g110 *= norm0.w;
-      vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
-      g001 *= norm1.x;
-      g011 *= norm1.y;
-      g101 *= norm1.z;
-      g111 *= norm1.w;
-
-      float n000 = dot(g000, Pf0);
-      float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
-      float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
-      float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
-      float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
-      float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
-      float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
-      float n111 = dot(g111, Pf1);
-
-      vec3 fade_xyz = fade(Pf0);
-      vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
-      vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-      float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
-      return 2.2 * n_xyz;
-    }
-
-    // Include the Ashima code here!
-
-    varying vec2 vUv;
-    varying float noise;
-    uniform float time;
-
-    float turbulence( vec3 p ) {
-      float w = 100.0;
-      float t = -.5;
-      for (float f = 1.0 ; f <= 10.0 ; f++ ){
-        float power = pow( 2.0, f );
-        t += abs( pnoise( vec3( power * p ), vec3( 10.0, 10.0, 10.0 ) ) / power );
-      }
-      return t;
-    }
-
-    void main() {
-
-      vUv = uv;
-
-      noise = 10.0 *  -.10 * turbulence( .5 * normal + time );
-      float b = 5.0 * pnoise( 0.05 * position + vec3( 2.0 * time ), vec3( 100.0 ) );
-      float displacement = - 10. * noise + b;
-
-      vec3 newPosition = position + normal * displacement;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
-
-    }
-  </script>
-
-  <script type="x-shader/x-vertex" id="fragmentShader">
-    varying vec2 vUv;
-    varying float noise;
-    uniform sampler2D tExplosion;
-
-    float random( vec3 scale, float seed ){
-      return fract( sin( dot( gl_FragCoord.xyz + seed, scale ) ) * 43758.5453 + seed ) ;
-    }
-
-    void main() {
-
-      float r = .01 * random( vec3( 12.9898, 78.233, 151.7182 ), 0.0 );
-      vec2 tPos = vec2( 0, 1.0 - 1.3 * noise + r );
-      vec4 color = texture2D( tExplosion, tPos );
-      gl_FragColor = vec4( color.rgb, 1.0 );
-
-    }
-  </script>
-
-  <script type="text/javascript" id="mainCode">
-    {% autoescape false %}
-    var response = {{ log }};
-    {% endautoescape %}
-    //var response = {"fleet": {"player2": [{"direction": "x", "location": {"y": 1, "x": 1}, "size": 2}, {"direction": "x", "location": {"y": 3, "x": 1}, "size": 3}, {"direction": "x", "location": {"y": 2, "x": 1}, "size": 3}, {"direction": "x", "location": {"y": 4, "x": 1}, "size": 4}, {"direction": "x", "location": {"y": 9, "x": 5}, "size": 5}], "player1": [{"direction": "x", "location": {"y": 1, "x": 1}, "size": 2}, {"direction": "x", "location": {"y": 3, "x": 7}, "size": 3}, {"direction": "y", "location": {"y": 4, "x": 2}, "size": 3}, {"direction": "y", "location": {"y": 2, "x": 4}, "size": 4}, {"direction": "x", "location": {"y": 7, "x": 5}, "size": 5}]}, "history": [{"player": 1, "guess": {"y": 0, "x": 0}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 0, "x": 0}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 0, "x": 1}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 9, "x": 9}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 0, "x": 2}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 5, "x": 3}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 0, "x": 3}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 3, "x": 0}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 0, "x": 4}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 2, "x": 6}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 0, "x": 5}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 8, "x": 7}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 0, "x": 6}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 4, "x": 5}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 0, "x": 7}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 7, "x": 9}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 9, "x": 5}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 0, "x": 8}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 8, "x": 6}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 0, "x": 9}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 5, "x": 9}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 1, "x": 0}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 7, "x": 4}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 1, "x": 1}, "result": 1, "sink": null}, {"player": 1, "guess": {"y": 1, "x": 2}, "result": 2, "sink": 1}, {"player": 1, "guess": {"y": 1, "x": 3}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 4, "x": 0}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 1, "x": 4}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 9, "x": 3}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 1, "x": 5}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 0, "x": 8}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 1, "x": 6}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 8, "x": 1}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 1, "x": 7}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 9, "x": 1}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 1, "x": 8}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 0, "x": 1}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 1, "x": 9}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 2, "x": 5}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 2, "x": 0}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 3, "x": 2}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 2, "x": 1}, "result": 1, "sink": null}, {"player": 1, "guess": {"y": 2, "x": 2}, "result": 1, "sink": null}, {"player": 1, "guess": {"y": 2, "x": 3}, "result": 2, "sink": 3}, {"player": 1, "guess": {"y": 2, "x": 4}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 8, "x": 0}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 2, "x": 5}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 3, "x": 4}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 9, "x": 2}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 2, "x": 6}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 6, "x": 5}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 2, "x": 7}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 1, "x": 5}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 2, "x": 8}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 5, "x": 1}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 2, "x": 9}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 2, "x": 1}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 3, "x": 0}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 9, "x": 8}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 3, "x": 1}, "result": 1, "sink": null}, {"player": 1, "guess": {"y": 3, "x": 2}, "result": 1, "sink": null}, {"player": 1, "guess": {"y": 3, "x": 3}, "result": 2, "sink": 2}, {"player": 1, "guess": {"y": 3, "x": 4}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 0, "x": 2}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 3, "x": 5}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 6, "x": 0}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 3, "x": 6}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 4, "x": 4}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 8, "x": 4}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 3, "x": 7}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 8, "x": 5}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 3, "x": 8}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 4, "x": 1}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 3, "x": 9}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 8, "x": 3}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 4, "x": 0}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 1, "x": 7}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 4, "x": 1}, "result": 1, "sink": null}, {"player": 1, "guess": {"y": 4, "x": 2}, "result": 1, "sink": null}, {"player": 1, "guess": {"y": 4, "x": 3}, "result": 1, "sink": null}, {"player": 1, "guess": {"y": 4, "x": 4}, "result": 2, "sink": 4}, {"player": 1, "guess": {"y": 4, "x": 5}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 6, "x": 6}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 4, "x": 6}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 6, "x": 4}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 4, "x": 7}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 8, "x": 2}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 4, "x": 8}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 0, "x": 4}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 4, "x": 9}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 7, "x": 5}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 1, "x": 1}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 7, "x": 1}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 5, "x": 0}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 0, "x": 9}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 5, "x": 1}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 9, "x": 0}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 5, "x": 2}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 7, "x": 7}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 5, "x": 2}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 4, "x": 3}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 5, "x": 3}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 1, "x": 2}, "result": 2, "sink": 1}, {"player": 2, "guess": {"y": 7, "x": 2}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 5, "x": 4}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 6, "x": 8}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 5, "x": 5}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 2, "x": 2}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 5, "x": 6}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 4, "x": 6}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 5, "x": 7}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 2, "x": 4}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 5, "x": 6}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 5, "x": 8}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 0, "x": 7}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 5, "x": 9}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 2, "x": 8}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 6, "x": 0}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 1, "x": 0}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 6, "x": 1}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 3, "x": 5}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 6, "x": 2}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 4, "x": 9}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 6, "x": 3}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 5, "x": 4}, "result": 2, "sink": 4}, {"player": 2, "guess": {"y": 4, "x": 8}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 6, "x": 4}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 9, "x": 4}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 6, "x": 5}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 6, "x": 1}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 6, "x": 6}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 0, "x": 3}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 6, "x": 7}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 5, "x": 7}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 6, "x": 8}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 9, "x": 7}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 6, "x": 9}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 0, "x": 5}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 7, "x": 0}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 2, "x": 7}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 7, "x": 1}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 4, "x": 2}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 3, "x": 9}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 1, "x": 8}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 7, "x": 2}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 1, "x": 6}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 7, "x": 3}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 1, "x": 9}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 7, "x": 4}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 3, "x": 7}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 7, "x": 6}, "result": 1, "sink": null}, {"player": 2, "guess": {"y": 6, "x": 2}, "result": 2, "sink": 3}, {"player": 2, "guess": {"y": 6, "x": 9}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 7, "x": 5}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 1, "x": 3}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 7, "x": 6}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 1, "x": 4}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 7, "x": 7}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 8, "x": 9}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 7, "x": 8}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 8, "x": 8}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 7, "x": 9}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 3, "x": 1}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 8, "x": 0}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 5, "x": 0}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 8, "x": 1}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 7, "x": 0}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 8, "x": 2}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 7, "x": 8}, "result": 2, "sink": 5}, {"player": 2, "guess": {"y": 0, "x": 6}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 8, "x": 3}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 2, "x": 0}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 8, "x": 4}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 9, "x": 6}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 8, "x": 5}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 2, "x": 9}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 8, "x": 6}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 6, "x": 7}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 8, "x": 7}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 5, "x": 8}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 8, "x": 8}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 7, "x": 3}, "result": 0, "sink": null}, {"player": 1, "guess": {"y": 8, "x": 9}, "result": 0, "sink": null}, {"player": 2, "guess": {"y": 3, "x": 8}, "result": 3, "sink": 2}]}
-
-    var board_1 = response.fleet.player2;
-    var board_2 = response.fleet.player1;
-    var logs = response.history;
-
-    console.log(board_1);
-    console.log(board_2);
-
-    var bombX = 0;
-    var bombZ = 0;
-    var bombPlayer = 0;
-
-    // show_toast("asdfasdf","(success|warning|error)")
-    function Ship(x, y, size, direction) {
-      //public variable
-      this.location = {'x':x, 'z':y}
-      this.size   = size;
-      this.direction  = direction;
-
-
-      switch(this.size) {
-        case 2:
-          this.scaleX = 0.1;
-          this.scaleY = 0.1;
-          this.scaleZ = 0.2;
-          if(this.direction == 'x'){
-            this.revisionX = 10;
-            this.revisionZ = 50;
-          }
-          else{
-            this.revisionX = 100;
-            this.revisionZ = 25;
-          }
-          this.rotation = 0;
-          break;
-        case 3:
-          this.scaleX = 5;
-          this.scaleY = 6;
-          this.scaleZ = 4.5;
-          if(this.direction == 'x'){
-            this.revisionX = 40;
-            this.revisionZ = 20;
-          }
-          else{
-            this.revisionX = 75;
-            this.revisionZ = 0;
-          }
-          this.rotation = 0;
-          break;
-          
-        case 4:
-          this.scaleX = 8;
-          this.scaleY = 5;
-          this.scaleZ = 5;
-          if(this.direction == 'x'){
-            this.revisionX = 50;
-            this.revisionZ = 50;
-          }
-          else{
-            this.revisionX = 70;
-            this.revisionZ = 0;
-          }
-          // this.rotation = Math.PI/2;
-          // this.rotation = -Math.PI/16;
-          this.rotation = 0;
-          // this.rotation = 0;
-          break;
-        case 5:
-          this.scaleX = 4;
-          this.scaleY = 4;
-          this.scaleZ = 4;
-          this.revisionX = -10;
-          this.revisionZ = 10;
-          this.rotation = Math.PI/2;
-          break;
-      }
-      if(this.direction == 'y')
-        this.rotation += Math.PI/2;
-    }
-
-    var ship_1_1 = new Ship(board_1[0].location.x, board_1[0].location.y, board_1[0].size,board_1[0].direction);
-    var ship_1_2 = new Ship(board_1[1].location.x, board_1[1].location.y, board_1[1].size,board_1[1].direction);
-    var ship_1_3 = new Ship(board_1[2].location.x, board_1[2].location.y, board_1[2].size,board_1[2].direction);
-    var ship_1_4 = new Ship(board_1[3].location.x, board_1[3].location.y, board_1[3].size,board_1[3].direction);
-    var ship_1_5 = new Ship(board_1[4].location.x, board_1[4].location.y, board_1[4].size,board_1[4].direction);
-
-    var ship_2_1 = new Ship(board_2[0].location.x, board_2[0].location.y, board_2[0].size,board_2[0].direction);
-    var ship_2_2 = new Ship(board_2[1].location.x, board_2[1].location.y, board_2[1].size,board_2[1].direction);
-    var ship_2_3 = new Ship(board_2[2].location.x, board_2[2].location.y, board_2[2].size,board_2[2].direction);
-    var ship_2_4 = new Ship(board_2[3].location.x, board_2[3].location.y, board_2[3].size,board_2[3].direction);
-    var ship_2_5 = new Ship(board_2[4].location.x, board_2[4].location.y, board_2[4].size,board_2[4].direction);
-
-    console.log(ship_1_1);
-    console.log(ship_1_2);
-    console.log(ship_1_3);
-    console.log(ship_1_4);
-    console.log(ship_1_5);
-
-
-      // Put the main code here
-    var container, 
-    renderer, 
-    scene, 
-    camera, 
-    mesh, 
-    start = Date.now(),
-
-    fov = 30,
-
-    bombTime = -1,
-    EXPIREBOMB = 50;
-
-    init();
-    animate();
-
-    function init(){
-            // grab the container from the DOM
-            container = document.getElementById( "container" );
-            
-
-      // create a camera the size of the browser window
-      // and place it 100 units away, looking towards the center of the scene
-      camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, - 500, 1000 );
-      camera.position.x = 200;
-      camera.position.y = 100;
-      // camera.position.z = 100;
-      camera.position.z = 200;
-
-            // create a scene
-            scene = new THREE.Scene();
-
-      var size = 500, step = 50;
-      var lineGeometry = new THREE.Geometry();
-
-      for ( var i = 0; i <= size; i += step ) {
-        lineGeometry.vertices.push( new THREE.Vector3( - size, 0, i ) );
-        lineGeometry.vertices.push( new THREE.Vector3(   0, 0, i ) );
-
-        lineGeometry.vertices.push( new THREE.Vector3( -i, 0, 0) );
-        lineGeometry.vertices.push( new THREE.Vector3( -i, 0,   size ) );
-      }
-      for ( var i = 0; i <= size; i += step ) {
-        lineGeometry.vertices.push( new THREE.Vector3(  size, 0, -i ) );
-        lineGeometry.vertices.push( new THREE.Vector3(   0, 0, -i ) );
-
-        lineGeometry.vertices.push( new THREE.Vector3(  i, 0, 0) );
-        lineGeometry.vertices.push( new THREE.Vector3(  i, 0,   -size ) );
-      }
-
-            var lineMaterial = new THREE.LineBasicMaterial( { color: 0x000000, opacity: 0.2 } );
-
-            var line = new THREE.Line( lineGeometry, lineMaterial );
-            line.type = THREE.LinePieces;
-            scene.add( line );
-
-
-            var manager = new THREE.LoadingManager();
-            manager.onProgress = function ( item, loaded, total ) {
-              console.log( item, loaded, total );
-            };
-
-            var loader = new THREE.OBJLoader( manager );
-            loader.load( '../static/visualize/res/obj/ship01.obj', function ( object ) {
-              object.traverse( function ( child ) {} );
-
-              console.log("ship1");
-              console.log("position: "+ship_1_1.location.x+","+ship_1_1.location.z);
-              console.log("direction:"+ship_1_1.direction);
-              console.log("rotation: "+ship_1_1.rotation);
-              console.log("revision: "+ship_1_1.revisionX+","+ship_1_1.revisionZ);
-              console.log("real position" + getXPosition(
-                ship_1_1.location.x, 
-                ship_1_1.size, 
-                ship_1_1.direction, 
-                ship_1_1.revisionX, 1)+","+getZPosition(
-                ship_1_1.location.z, 
-                ship_1_1.size, 
-                ship_1_1.direction, 
-                 ship_1_1.revisionZ, 1));
-
-
-
-              object.scale.set(ship_1_1.scaleX, ship_1_1.scaleY, ship_1_1.scaleZ);
-              object.rotation.set(0, ship_1_1.rotation, 0);
-              object.position.x = getXPosition(
-                ship_1_1.location.x, 
-                ship_1_1.size, 
-                ship_1_1.direction, 
-                ship_1_1.revisionX, 1);
-              object.position.y = 25;
-              object.position.z = getZPosition(
-                ship_1_1.location.z, 
-                ship_1_1.size, 
-                ship_1_1.direction, 
-                 ship_1_1.revisionZ, 1);
-              scene.add( object );
-            } );
-            
-      loader.load( '../static/visualize/res/obj/ship02.obj', function ( object ) {
-              object.traverse( function ( child ) {} );
-
-              console.log("ship2");
-              console.log("position: "+ship_1_2.location.x+","+ship_1_2.location.z);
-              console.log("direction:"+ship_1_2.direction);
-              console.log("rotation: "+ship_1_2.rotation);
-              console.log("revision: "+ship_1_2.revisionX+","+ship_1_2.revisionZ);
-              console.log("real position" + getXPosition(
-                ship_1_2.location.x, 
-                ship_1_2.size, 
-                ship_1_2.direction, 
-                ship_1_2.revisionX, 1)+","+getZPosition(
-                ship_1_2.location.z, 
-                ship_1_2.size, 
-                ship_1_2.direction, 
-                 ship_1_2.revisionZ, 1));
-
-
-              // object.scale.set(0.04,0.04,0.04);
-              object.scale.set(ship_1_2.scaleX, ship_1_2.scaleY, ship_1_2.scaleZ);
-              object.rotation.set(0, ship_1_1.rotation, 0);
-              object.position.x = getXPosition(
-                ship_1_2.location.x, 
-                ship_1_2.size, 
-                ship_1_2.direction, 
-                ship_1_2.revisionX, 1);
-              object.position.y = 25;
-              object.position.z = getZPosition(
-                ship_1_2.location.z, 
-                ship_1_2.size, 
-                ship_1_2.direction, 
-                 ship_1_2.revisionZ, 1);
-              scene.add( object );
-            } );
-
-      loader.load( '../static/visualize/res/obj/ship03.obj', function ( object ) {
-              object.traverse( function ( child ) {} );
-              object.scale.set(ship_1_3.scaleX, ship_1_3.scaleY, ship_1_3.scaleZ);
-              object.rotation.set(0, ship_1_3.rotation, 0);
-              object.position.x = getXPosition(
-                ship_1_3.location.x, 
-                ship_1_3.size, 
-                ship_1_3.direction, 
-                ship_1_3.revisionX, 1);
-              object.position.y = 25;
-              object.position.z = getZPosition(
-                ship_1_3.location.z, 
-                ship_1_3.size, 
-                ship_1_3.direction, 
-                ship_1_3.revisionZ, 1);
-              scene.add( object );
-            } );
-
-      loader.load( '../static/visualize/res/obj/ship04.obj', function ( object ) {
-              object.traverse( function ( child ) {} );
-              object.scale.set(ship_1_4.scaleX, ship_1_4.scaleY, ship_1_4.scaleZ);
-              object.rotation.set(0, ship_1_4.rotation, 0);
-              object.position.x = getXPosition(
-                ship_1_4.location.x, 
-                ship_1_4.size, 
-                ship_1_4.direction, 
-                ship_1_4.revisionX, 1);
-              object.position.y = 25;
-              object.position.z = getZPosition(
-                ship_1_4.location.z, 
-                ship_1_4.size, 
-                ship_1_4.direction, 
-                ship_1_4.revisionZ, 1);
-        // object.position = (getXPosition(settings[3].location.x, 4, settings[3].direction, ship_1_4.rotation, 1), 25, getZPosition(settings[3].location.y, 4, settings[3].direction, ship_1_4.rotation, 1));
-        console.log(object);
-              scene.add( object );
-            } );
-
-            loader.load( '../static/visualize/res/obj/ship05.obj', function ( object ) {
-              object.traverse( function ( child ) {} );
-              object.scale.set(ship_1_5.scaleX, ship_1_5.scaleY, ship_1_5.scaleZ);
-              object.rotation.set(0, ship_1_5.rotation, 0);
-              object.position.x = getXPosition(
-                ship_1_5.location.x, 
-                ship_1_5.size, 
-                ship_1_5.direction, 
-                ship_1_5.revisionX, 1);
-              object.position.y = 25;
-              object.position.z = getZPosition(
-                ship_1_5.location.z, 
-                ship_1_5.size, 
-                ship_1_5.direction, 
-                 ship_1_5.revisionZ, 1);
-              scene.add( object );
-            } );
-
-      loader.load( '../static/visualize/res/obj/ship01.obj', function ( object ) {
-              object.traverse( function ( child ) {} );
-              object.scale.set(ship_2_1.scaleX, ship_2_1.scaleY, ship_2_1.scaleZ);
-              object.rotation.set(0, ship_2_1.rotation, 0);
-              object.position.x = getXPosition(
-                ship_2_1.location.x, 
-                ship_2_1.size, 
-                ship_2_1.direction, 
-                ship_2_1.revisionX, 2);
-              object.position.y = 25;
-              object.position.z = getZPosition(
-                ship_2_1.location.z, 
-                ship_2_1.size, 
-                ship_2_1.direction, 
-                 ship_2_1.revisionZ, 2);
-              scene.add( object );
-            } );
-            
-      loader.load( '../static/visualize/res/obj/ship02.obj', function ( object ) {
-              object.traverse( function ( child ) {} );
-              object.scale.set(ship_2_2.scaleX, ship_2_2.scaleY, ship_2_2.scaleZ);
-              object.rotation.set(0, ship_2_1.rotation, 0);
-              object.position.x = getXPosition(
-                ship_2_2.location.x, 
-                ship_2_2.size, 
-                ship_2_2.direction, 
-                ship_2_2.revisionX, 2);
-              object.position.y = 25;
-              object.position.z = getZPosition(
-                ship_2_2.location.z, 
-                ship_2_2.size, 
-                ship_2_2.direction, 
-                 ship_2_2.revisionZ, 2);
-              scene.add( object );
-            } );
-
-      loader.load( '../static/visualize/res/obj/ship03.obj', function ( object ) {
-              object.traverse( function ( child ) {} );
-              object.scale.set(ship_2_3.scaleX, ship_2_3.scaleY, ship_2_3.scaleZ);
-              object.rotation.set(0, ship_2_3.rotation, 0);
-              object.position.x = getXPosition(
-                ship_2_3.location.x, 
-                ship_2_3.size, 
-                ship_2_3.direction, 
-                ship_2_3.revisionX, 2);
-              object.position.y = 25;
-              object.position.z = getZPosition(
-                ship_2_3.location.z, 
-                ship_2_3.size, 
-                ship_2_3.direction, 
-                ship_2_3.revisionZ, 2);
-              scene.add( object );
-            } );
-
-      loader.load( '../static/visualize/res/obj/ship04.obj', function ( object ) {
-              object.traverse( function ( child ) {} );
-              object.scale.set(ship_2_4.scaleX, ship_2_4.scaleY, ship_2_4.scaleZ);
-              object.rotation.set(0, ship_2_4.rotation, 0);
-              object.position.x = getXPosition(
-                ship_2_4.location.x, 
-                ship_2_4.size, 
-                ship_2_4.direction, 
-                ship_2_4.revisionX, 2);
-              object.position.y = 25;
-              object.position.z = getZPosition(
-                ship_2_4.location.z, 
-                ship_2_4.size, 
-                ship_2_4.direction, 
-                ship_2_4.revisionZ, 2);
-        console.log(object);
-              scene.add( object );
-            } );
-
-            loader.load( '../static/visualize/res/obj/ship05.obj', function ( object ) {
-              object.traverse( function ( child ) {} );
-              object.scale.set(ship_2_5.scaleX, ship_2_5.scaleY, ship_2_5.scaleZ);
-              object.rotation.set(0, ship_1_5.rotation, 0);
-              object.position.x = getXPosition(
-                ship_2_5.location.x, 
-                ship_2_5.size, 
-                ship_2_5.direction, 
-                ship_2_5.revisionX, 2);
-              object.position.y = 25;
-              object.position.z = getZPosition(
-                ship_2_5.location.z, 
-                ship_2_5.size, 
-                ship_2_5.direction, 
-                 ship_2_5.revisionZ, 2);
-              scene.add( object );
-            } );
-           
-           
-
-
-      bombMaterial = new THREE.ShaderMaterial( {
-        uniforms: { 
-              tExplosion: {
-                type: "t", 
-                value: THREE.ImageUtils.loadTexture( '../static/visualize/res/img/explosion.png' )
-              },
-              time: { // float initialized to 0
-                type: "f", 
-                value: 0.0 
-                }
-        },
-        vertexShader: document.getElementById( 'vertexShader' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShader' ).textContent
-
-      } );
-
-        // create a sphere and assign the material
-      mesh = new THREE.Mesh( 
-            new THREE.IcosahedronGeometry( 20, 4 ), 
-            bombMaterial
-          );
-      // scene.add( mesh );
-        
-      var ambientLight = new THREE.AmbientLight( Math.random() * 0x10 );
-      scene.add( ambientLight );
-
-      var directionalLight = new THREE.DirectionalLight( Math.random() * 0xffffff );
-      directionalLight.position.x = Math.random() - 0.5;
-      directionalLight.position.y = Math.random() - 0.5;
-      directionalLight.position.z = Math.random() - 0.5;
-      directionalLight.position.normalize();
-      scene.add( directionalLight );
-
-      var directionalLight = new THREE.DirectionalLight( Math.random() * 0xffffff );
-      directionalLight.position.x = Math.random() - 0.5;
-      directionalLight.position.y = Math.random() - 0.5;
-      directionalLight.position.z = Math.random() - 0.5;
-      directionalLight.position.normalize();
-      scene.add( directionalLight );
-
-      renderer = new THREE.WebGLRenderer();
-      renderer.setClearColor( 0xf0f0f0 );
-      renderer.setSize( window.innerWidth, window.innerHeight );
-        
-
-      container.appendChild( renderer.domElement );
-      window.addEventListener( 'resize', onWindowResize, false );
-    }
-
-    function makeBomb(x, z, player){
-      if(player == 1)
-        mesh.position.set(x * 50 - 500 - 25, 0, z * 50 - 25);
-      else
-        mesh.position.set(x * 50 - 25, 0, z * 50 - 500 - 25)
-      scene.add(mesh);
-      bombTime++;
-    }
-
-    function removeBomb(){
-      scene.remove(mesh);
-      bombTime = -1;
-    }
-
-    function changeBoardColor(x, z, color, player){
-            var rectGeometry = new THREE.BoxGeometry( 50, 1, 50 );
-            var rectMaterialRed = new THREE.MeshBasicMaterial( {color: 0xC66464} );
-            var rectMaterialBlack = new THREE.MeshBasicMaterial( {color: 0x000000} );
-      if(color == 'red'){
-              shade = new THREE.Mesh( rectGeometry, rectMaterialRed );
-      }
-      else if(color == 'black'){
-        shade = new THREE.Mesh( rectGeometry, rectMaterialBlack);
-      }
-      if (player == 1)
-        shade.position.set(x*50-500-25, 0, z*50-25);
-      else
-        shade.position.set(x*50-25, 0, z*50-500-25);
-      scene.add(shade);
-    }
-
-    function getXPosition(x, size, direction, revision, player) {
-      var side;
-      if (player == 1){
-        side = -500;
-      }
-      else if(player == 2){
-        side = 0;
-      }
-
-      if(direction == 'y'){
-        console.log("x: ")
-        console.log((x+1) * 50 - 25 + side + revision)
-        return (x+1) * 50 - 25 + side + revision;
-      }
-      else{
-        console.log((x + size/2) * 50 + side + revision);
-        return   (x + 1 + size/2) * 50 + side + revision;
-      }
-    }
-
-    function getZPosition(z, size, direction, revision, player) {
-      var side;
-      if (player == 1){
-        side = 0;
-      }
-      else{
-        side = -500;
-      }
-      if(direction == 'x'){
-        console.log((z + 1) * 50 + 25 + side + revision)
-        return (z + 1) * 50 + 25 + side + revision;
-      }
-      else{
-        console.log((z + size/2) * 50 + side + revision);
-        return   (z + 1 + size/2) * 50 + side + revision;
-      }
-    }
-
-    function onWindowResize() {
-      camera.left = window.innerWidth / - 2;
-      camera.right = window.innerWidth / 2;
-      camera.top = window.innerHeight / 2;
-      camera.bottom = window.innerHeight / - 2;
-
-      camera.updateProjectionMatrix();
-
-      renderer.setSize( window.innerWidth, window.innerHeight );
-    }
-
-    function animate() {
-      if(bombTime > 0 && bombTime < EXPIREBOMB){
-        // console.log(bombTime);
-        makeBomb(bombX,bombZ,bombPlayer);
-        mesh.scale.set(bombTime/10, bombTime/10, bombTime/10);
-        bombMaterial.uniforms[ 'time' ].value = .00025 * ( Date.now() - start );
-      }
-      else {
-        removeBomb();
-      }
-      requestAnimationFrame( animate );
-      render();
-    }
-
-
-    function render() {
-            camera.lookAt( scene.position );
-      renderer.render( scene, camera );
-        
-    }
-
-    $(document).ready(function(){
-
-      var logNum = 0;
-
-      $(document).keydown(function(e){
-        if(e.keyCode == '32'){
-          console.log(logs[logNum]);
-          var player = logs[logNum].player;
-          console.log(player);
-          
-          if(logs[logNum].result > 0){
-            bombX = logs[logNum].guess.x + 1;
-            bombZ = logs[logNum].guess.y + 1;
-            bombPlayer = logs[logNum].player;
-            makeBomb(bombX, bombZ, player);
-            bombTime = 1;
-            changeBoardColor(logs[logNum].guess.x + 1, logs[logNum].guess.y + 1,'red',player);
-          }
-          else if(logs[logNum].result == 0){
-            changeBoardColor(logs[logNum].guess.x + 1,logs[logNum].guess.y + 1,'black',player)
-          }
-          logNum++;
-        }
-      });
-    })
+	<head>
+		<meta charset="UTF-8">
+		<title>Battleship</title>
+	</head>
+	<body>
+		<div id="container" style="display:none;">
+		</div>
+		<!-- <div id="loadContents"></div> -->
+		<img src="../static/visualize/res/img/lion.jpg" id="loadContents" style="width: 100%; height: 100%; ">
+	</body>
+
+	<script src="../static/visualize/js/three.min.js"></script>
+	<script type="text/javascript" src="../static/visualize/js/OBJLoader.js"></script>
+	<script type="text/javascript" src="../static/visualize/js/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="../static/js/lib/toast.js"></script>
+	<script type="x-shader/x-vertex" id="vertexShader">
+		vec3 mod289(vec3 x)
+		{
+			return x - floor(x * (1.0 / 289.0)) * 289.0;
+		}
+
+		vec4 mod289(vec4 x)
+		{
+			return x - floor(x * (1.0 / 289.0)) * 289.0;
+		}
+
+		vec4 permute(vec4 x)
+		{
+			return mod289(((x*34.0)+1.0)*x);
+		}
+
+		vec4 taylorInvSqrt(vec4 r)
+		{
+			return 1.79284291400159 - 0.85373472095314 * r;
+		}
+
+		vec3 fade(vec3 t) {
+			return t*t*t*(t*(t*6.0-15.0)+10.0);
+		}
+
+		// Classic Perlin noise
+		float cnoise(vec3 P)
+		{
+			vec3 Pi0 = floor(P); // Integer part for indexing
+			vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
+			Pi0 = mod289(Pi0);
+			Pi1 = mod289(Pi1);
+			vec3 Pf0 = fract(P); // Fractional part for interpolation
+			vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
+			vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
+			vec4 iy = vec4(Pi0.yy, Pi1.yy);
+			vec4 iz0 = Pi0.zzzz;
+			vec4 iz1 = Pi1.zzzz;
+
+			vec4 ixy = permute(permute(ix) + iy);
+			vec4 ixy0 = permute(ixy + iz0);
+			  vec4 ixy1 = permute(ixy + iz1);
+
+			vec4 gx0 = ixy0 * (1.0 / 7.0);
+			vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
+			gx0 = fract(gx0);
+			vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
+			vec4 sz0 = step(gz0, vec4(0.0));
+			gx0 -= sz0 * (step(0.0, gx0) - 0.5);
+			gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+
+			vec4 gx1 = ixy1 * (1.0 / 7.0);
+			vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
+			gx1 = fract(gx1);
+			vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
+			vec4 sz1 = step(gz1, vec4(0.0));
+			gx1 -= sz1 * (step(0.0, gx1) - 0.5);
+			gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+
+			vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
+			vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
+			vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
+			vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
+			vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
+			vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
+			vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
+			vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
+
+			vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
+			g000 *= norm0.x;
+			g010 *= norm0.y;
+			g100 *= norm0.z;
+			g110 *= norm0.w;
+			vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
+			g001 *= norm1.x;
+			g011 *= norm1.y;
+			g101 *= norm1.z;
+			g111 *= norm1.w;
+
+			float n000 = dot(g000, Pf0);
+			float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
+			float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
+			float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
+			float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
+			float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
+			float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
+			float n111 = dot(g111, Pf1);
+
+			vec3 fade_xyz = fade(Pf0);
+			vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
+			vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
+			float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+			return 2.2 * n_xyz;
+		}
+
+		// Classic Perlin noise, periodic variant
+		float pnoise(vec3 P, vec3 rep)
+		{
+			vec3 Pi0 = mod(floor(P), rep); // Integer part, modulo period
+			vec3 Pi1 = mod(Pi0 + vec3(1.0), rep); // Integer part + 1, mod period
+			Pi0 = mod289(Pi0);
+			Pi1 = mod289(Pi1);
+			vec3 Pf0 = fract(P); // Fractional part for interpolation
+			vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
+			vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
+			vec4 iy = vec4(Pi0.yy, Pi1.yy);
+			vec4 iz0 = Pi0.zzzz;
+			vec4 iz1 = Pi1.zzzz;
+
+			vec4 ixy = permute(permute(ix) + iy);
+			vec4 ixy0 = permute(ixy + iz0);
+			vec4 ixy1 = permute(ixy + iz1);
+
+			vec4 gx0 = ixy0 * (1.0 / 7.0);
+			vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
+			gx0 = fract(gx0);
+			vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
+			vec4 sz0 = step(gz0, vec4(0.0));
+			gx0 -= sz0 * (step(0.0, gx0) - 0.5);
+			gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+
+			vec4 gx1 = ixy1 * (1.0 / 7.0);
+			vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
+			gx1 = fract(gx1);
+			vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
+			vec4 sz1 = step(gz1, vec4(0.0));
+			gx1 -= sz1 * (step(0.0, gx1) - 0.5);
+			gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+
+			vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
+			vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
+			vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
+			vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
+			vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
+			vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
+			vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
+			vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
+
+			vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
+			g000 *= norm0.x;
+			g010 *= norm0.y;
+			g100 *= norm0.z;
+			g110 *= norm0.w;
+			vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
+			g001 *= norm1.x;
+			g011 *= norm1.y;
+			g101 *= norm1.z;
+			g111 *= norm1.w;
+
+			float n000 = dot(g000, Pf0);
+			float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
+			float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
+			float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
+			float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
+			float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
+			float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
+			float n111 = dot(g111, Pf1);
+
+			vec3 fade_xyz = fade(Pf0);
+			vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
+			vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
+			float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
+			return 2.2 * n_xyz;
+		}
+
+		// Include the Ashima code here!
+
+		varying vec2 vUv;
+		varying float noise;
+		uniform float time;
+
+		float turbulence( vec3 p ) {
+			float w = 100.0;
+			float t = -.5;
+			for (float f = 1.0 ; f <= 10.0 ; f++ ){
+				float power = pow( 2.0, f );
+				t += abs( pnoise( vec3( power * p ), vec3( 10.0, 10.0, 10.0 ) ) / power );
+			}
+			return t;
+		}
+
+		void main() {
+
+			vUv = uv;
+
+			noise = 10.0 *  -.10 * turbulence( .5 * normal + time );
+			float b = 5.0 * pnoise( 0.05 * position + vec3( 2.0 * time ), vec3( 100.0 ) );
+			float displacement = - 10. * noise + b;
+
+			vec3 newPosition = position + normal * displacement;
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
+
+		}
+	</script>
+
+	<script type="x-shader/x-vertex" id="fragmentShader">
+		varying vec2 vUv;
+		varying float noise;
+		uniform sampler2D tExplosion;
+
+		float random( vec3 scale, float seed ){
+			return fract( sin( dot( gl_FragCoord.xyz + seed, scale ) ) * 43758.5453 + seed ) ;
+		}
+
+		void main() {
+
+			float r = .01 * random( vec3( 12.9898, 78.233, 151.7182 ), 0.0 );
+			vec2 tPos = vec2( 0, 1.0 - 1.3 * noise + r );
+			vec4 color = texture2D( tExplosion, tPos );
+			gl_FragColor = vec4( color.rgb, 1.0 );
+
+		}
+	</script>
+
+	<script type="text/javascript" id="mainCode">
+
+		$(document).ready(function(){
+		var response = {% autoescape false %}{{ log }}{% endautoescape %};
+
+		var container, 
+		renderer, 
+		boardScene,
+		scene, 
+		camera, 
+		mesh, 
+		start = Date.now();
+
+		var bombTime = -1;
+		var EXPIREBOMB = 30;
+
+		var 	BOARDCOLOR = 0x1C3D67,
+			LINECOLOR = 0xffffff,
+			AMBIENTLIGHTCOLOR = 0x00000A,
+			DIRECTIONALLIGHTCOLOR1 = 0x5B84B1,
+			DIRECTIONALLIGHTCOLOR2 = 0x98869F,
+			CORRECTSHOOTCOLOR = 0xC66464,
+			WRONGSHOOTCOLOR = 0x888888;
+			
+
+		var board_1 = response.fleet.player1;
+		var board_2 = response.fleet.player2;
+		var logs = response.history;
+
+		var bombX = 0;
+		var bombZ = 0;
+		var bombPlayer = 0;
+		var bombScene = new THREE.Scene();
+
+		var binded = 0;
+		var logNum = 0;
+		var completed = false;
+
+		function Ship(x, y, size, direction) {
+			this.location	= {'x':x, 'z':y}
+			this.size 	= size;
+			this.direction 	= direction;
+
+
+			switch(this.size) {
+				case 2:
+					this.scaleX = 0.07;
+					this.scaleY = 0.1;
+					this.scaleZ = 0.2;
+					if(this.direction == 'x'){
+						this.revisionX = 0;
+						this.revisionZ = 50;
+					}
+					else{
+						this.revisionX = 100;
+						this.revisionZ = 25;
+					}
+					this.rotation = 0;
+					break;
+				case 3:
+					this.scaleX = 5;
+					this.scaleY = 6;
+					this.scaleZ = 4.5;
+					if(this.direction == 'x'){
+						this.revisionX = 30;
+						this.revisionZ = 20;
+					}
+					else{
+						this.revisionX = 75;
+						this.revisionZ = 0;
+					}
+					this.rotation = 0;
+					break;
+					
+				case 4:
+					this.scaleX = 7;
+					this.scaleY = 5;
+					this.scaleZ = 3;
+					if(this.direction == 'x'){
+						this.revisionX = 50;
+						this.revisionZ = 20;
+					}
+					else{
+						this.revisionX = 70;
+						this.revisionZ = 0;
+					}
+					this.rotation = 0
+					break;
+				case 5:
+					this.scaleX = 4;
+					this.scaleY = 3;
+					this.scaleZ = 4;
+					if(this.direction == 'x'){
+						this.revisionX = -10;
+						this.revisionZ = 10;
+					}
+					else {
+						this.revisionX = 50;
+						this.revisionZ = 0;
+					}
+					this.rotation = Math.PI/2;
+					break;
+			}
+			if(this.direction == 'y')
+				this.rotation += Math.PI/2;
+		}
+		
+		var player1 = [];
+		var player2 = [];
+
+		for (var i=0; i<5; i++){
+			player1[i] = new Ship(board_2[i].location.x, board_2[i].location.y, board_2[i].size, board_2[i].direction);
+			player2[i] = new Ship(board_1[i].location.x, board_1[i].location.y, board_1[i].size, board_1[i].direction)
+		}
+		console.log(player1);
+		console.log(player2);
+
+		init();
+		animate();
+
+		function init(){
+	        	container = document.getElementById( "container" );
+			camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, - 500, 1000 );
+			camera.position.x = 200;
+			camera.position.y = 100;
+			camera.position.z = 200;
+
+
+        		boardScene = new THREE.Scene();
+
+        		var boardGeometry = new THREE.BoxGeometry( 500, 5, 500 );
+		        var boardMaterial = new THREE.MeshBasicMaterial( {color: BOARDCOLOR} );
+			
+			var board1 = new THREE.Mesh( boardGeometry, boardMaterial );
+			board1.position.set(-250, 0, 250);
+			boardScene.add(board1);
+
+			var board2 = new THREE.Mesh( boardGeometry, boardMaterial );
+			board2.position.set(250, 0, -250);
+			boardScene.add(board2);
+
+
+			scene = new THREE.Scene();
+
+			var size = 500, step = 50;
+			var lineGeometry = new THREE.Geometry();
+
+			for ( var i = 0; i <= size; i += step ) {
+				lineGeometry.vertices.push( new THREE.Vector3( - size, 0, i ) );
+				lineGeometry.vertices.push( new THREE.Vector3(   0, 0, i ) );
+
+				lineGeometry.vertices.push( new THREE.Vector3( -i, 0, 0) );
+				lineGeometry.vertices.push( new THREE.Vector3( -i, 0,   size ) );
+			}
+			for ( var i = 0; i <= size; i += step ) {
+				lineGeometry.vertices.push( new THREE.Vector3(  size, 0, -i ) );
+				lineGeometry.vertices.push( new THREE.Vector3(   0, 0, -i ) );
+
+				lineGeometry.vertices.push( new THREE.Vector3(  i, 0, 0) );
+				lineGeometry.vertices.push( new THREE.Vector3(  i, 0,   -size ) );
+			}
+
+        		var lineMaterial = new THREE.LineBasicMaterial( { color: LINECOLOR, opacity: 0.8 } );
+
+		        var line = new THREE.Line( lineGeometry, lineMaterial );
+		        line.type = THREE.LinePieces;
+		        scene.add( line );
+
+		        for(var player=1; player<3; player++){
+			        for(var i=1; i<6; i++){
+			        	if(player == 1)
+			        		shipLoader(player1[i-1], i, player);
+			        	else
+			        		shipLoader(player2[i-1], i, player);
+			        }
+			}
+
+			bombMaterial = new THREE.ShaderMaterial( {
+				uniforms: { 
+			    		tExplosion: {
+			    			type: "t", 
+			    			value: THREE.ImageUtils.loadTexture( '../static/visualize/res/img/explosion.png' )
+			    		},
+			        time: {
+			        	type: "f", 
+			        	value: 0.0 
+			        	}
+				},
+				vertexShader: document.getElementById( 'vertexShader' ).textContent,
+				fragmentShader: document.getElementById( 'fragmentShader' ).textContent
+
+			} );
+
+			mesh = new THREE.Mesh( 
+		    		new THREE.IcosahedronGeometry( 20, 4 ), 
+		    		bombMaterial
+		    	);
+
+
+		    	var ambientLight = new THREE.AmbientLight( AMBIENTLIGHTCOLOR );
+			console.log(ambientLight);
+		        scene.add( ambientLight );
+		        
+		        var directionalLight = new THREE.DirectionalLight( DIRECTIONALLIGHTCOLOR1 );
+		        directionalLight.position.x = 0.7633887690326467;
+		        directionalLight.position.y = -0.15978852522357995;
+		        directionalLight.position.z = -0.6258635750079197;
+		        directionalLight.position.normalize();
+		        console.log(directionalLight);
+		        scene.add( directionalLight );
+
+		        var directionalLight = new THREE.DirectionalLight(DIRECTIONALLIGHTCOLOR2);
+		        directionalLight.position.x = 0.6072938565785142;
+		        directionalLight.position.y = 0.6174954195212043;
+		        directionalLight.position.z = -0.4998935673044085;
+		        directionalLight.position.normalize();
+		        console.log(directionalLight);
+		        scene.add( directionalLight );
+
+
+			renderer = new THREE.WebGLRenderer();
+			renderer.setClearColor( 0xffffff );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.autoClear = false;
+
+			container.appendChild( renderer.domElement );
+			window.addEventListener( 'resize', onWindowResize, false );
+		}
+
+
+		function shipLoader(ship, i, player){
+			var manager = new THREE.LoadingManager();
+		        manager.onProgress = function ( item, loaded, total ) {
+		        	console.log( item, loaded, total );
+		        };
+
+		        var loader = new THREE.OBJLoader( manager );
+		        
+	        	var fileName = '../static/visualize/res/obj/ship0' + (i).toString() + '.obj';
+		        	// console.log(fileName);
+		        	loader.load( fileName, function ( object ) {
+			        	object.scale.set(ship.scaleX, ship.scaleY, ship.scaleZ);
+			        	object.rotation.set(0, ship.rotation, 0);
+			        	object.position.x = getXPosition(
+			        		ship.location.x, 
+			        		ship.size, 
+			        		ship.direction, 
+			        		ship.revisionX, player);
+			        	object.position.y = 25;
+			        	object.position.z = getZPosition(
+			        		ship.location.z, 
+			        		ship.size, 
+			        		ship.direction, 
+			        		ship.revisionZ, player);
+			        	scene.add( object );
+			        });
+		}
+
+		function makeBomb(x, z, player){
+			if(player == 1)
+				mesh.position.set(x * 50 - 500 - 25, 0, z * 50 - 25);
+			else
+				mesh.position.set(x * 50 - 25, 0, z * 50 - 500 - 25);
+
+			bombScene.add(mesh);
+			bombTime++;
+		}
+
+		function removeBomb(){
+			bombScene.remove(mesh);
+			bombTime = -1;
+		}
+
+		function changeBoardColor(x, z, color, player){
+
+		        var rectGeometry = new THREE.BoxGeometry( 48, 1, 48 );
+		        var rectMaterialRed = new THREE.MeshBasicMaterial( {color: CORRECTSHOOTCOLOR} );
+		        var rectMaterialBlack = new THREE.MeshBasicMaterial( {color: WRONGSHOOTCOLOR} );
+			if(color == 'red')
+			        shade = new THREE.Mesh( rectGeometry, rectMaterialRed );
+			else if(color == 'black')
+				shade = new THREE.Mesh( rectGeometry, rectMaterialBlack);
+
+			if (player == 1)
+				shade.position.set(x*50-500-25, 0, z*50-25);
+			else
+				shade.position.set(x*50-25, 0, z*50-500-25);
+			scene.add(shade);
+		}
+
+		function getXPosition(x, size, direction, revision, player) {
+			var side;
+			if (player == 1)
+				side = -500;
+			else if(player == 2)
+				side = 0;
+
+			if(direction == 'y')
+				return (x+1) * 50 - 25 + side + revision;
+			else
+				return   (x + 1 + size/2) * 50 + side + revision;
+		}
+
+		function getZPosition(z, size, direction, revision, player) {
+			var side;
+			if (player == 1)
+				side = 0;
+			else
+				side = -500;
+
+			if(direction == 'x')
+				return (z + 1) * 50 + 25 + side + revision;
+			else
+				return   (z + 1 + size/2) * 50 + side + revision;
+		}
+
+		function onWindowResize() {
+			camera.left = window.innerWidth / - 2;
+			camera.right = window.innerWidth / 2;
+			camera.top = window.innerHeight / 2;
+			camera.bottom = window.innerHeight / - 2;
+
+			camera.updateProjectionMatrix();
+
+			renderer.setSize( window.innerWidth, window.innerHeight );
+		}
+
+		function animate() {
+			if(THREE.Object3DIdCount == 34){
+				if (!binded){
+					$('#container').show();
+					$('#loadContents').fadeOut(1000);
+					$(document).keydown(function(e){
+						if(e.keyCode == '32'){
+							console.log(logs[logNum]);
+							var player = logs[logNum].player;
+							console.log(player);
+
+							if(logs[logNum].result > 0){
+								bombX = logs[logNum].guess.x + 1;
+								bombZ = logs[logNum].guess.y + 1;
+								bombPlayer = logs[logNum].player;
+								makeBomb(bombX, bombZ, player);
+								bombTime = 1;
+								changeBoardColor(logs[logNum].guess.x + 1, logs[logNum].guess.y + 1,'red',player);
+							}
+							else if(logs[logNum].result == 0){
+								changeBoardColor(logs[logNum].guess.x + 1,logs[logNum].guess.y + 1,'black',player)
+							}
+							logNum++;
+						}
+					});
+					binded=true;
+				}
+				
+			}
+
+			if(logNum == logs.length && !completed){
+				$(document).unbind('keydown');
+				var lastPlayer = logs[logNum-1]['player'];
+				var lastSink = logs[logNum-1]['sink'];
+				if (!lastSink) {
+					if (lastPlayer==1) {
+						show_toast("Player 2 wins!","error");
+					} else {
+						show_toast("Player 1 wins!","success");
+					}
+				} else {
+					if (lastPlayer==1) {
+						show_toast("Player 1 wins!","success");
+					} else {
+						show_toast("Player 2 wins!","error");
+					}
+				}
+				completed = true;
+			}
+
+			if(bombTime > 0 && bombTime < EXPIREBOMB){
+				// console.log(bombTime);
+				makeBomb(bombX,bombZ,bombPlayer);
+				mesh.scale.set(bombTime/10, bombTime/10, bombTime/10);
+				bombMaterial.uniforms[ 'time' ].value = .00025 * ( Date.now() - start );
+			}
+			else {
+				removeBomb();
+			}
+			requestAnimationFrame( animate );
+			render();
+		}
+
+
+		function render() {
+        		camera.lookAt( scene.position );
+        		renderer.render( boardScene, camera );
+			renderer.clearDepth();
+			renderer.render( scene, camera );
+			renderer.clearDepth();
+			renderer.render( bombScene, camera);
+		    
+		}
+	});
 
 </script>
 
