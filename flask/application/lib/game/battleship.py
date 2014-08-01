@@ -14,7 +14,7 @@ class Battleship:
 
         if direction == 'x' or direction == 'y':
             coordinates.append(dict(location))
-            for i in range(0, size-2):
+            for i in range(0, size-1):
                 location[ direction ] += 1
 
                 if location[direction] > 9:

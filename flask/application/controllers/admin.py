@@ -2,12 +2,14 @@ from flask import redirect, url_for, session, render_template, request
 from application import app
 from application.lib.auth import *
 from application.models.user_management import *
+from application.models.battle_management import *
 from application.constants import *
 from json import dumps,loads
 
 
 @app.route('/admin')
-def admin():
+@app.route('/admin/<active>')
+def admin(active='userList'):
     if not is_login():
         return redirect(url_for('login'))
     if not is_admin():
@@ -20,8 +22,21 @@ def admin():
         user[KEY_MEMBERS] = user[KEY_MEMBERS].decode('utf8')
         userList.append(user)
 
-    
-    return render_template('admin.html', current = request.path[1:],users = userList)
+
+
+
+    res = get_league_list(session[KEY_SCHOOL_ID])
+    leagueList = []
+    for row in res:
+        row[COL_SCHOOL_NAME] = row[COL_SCHOOL_NAME].decode('utf-8')
+        leagueList.append(row)
+    leagueCount = len(leagueList)
+    for i in range(leagueCount):
+        leagueList[i][KEY_RANKING] = get_ranking(leagueList[i][COL_ID])
+        
+
+
+    return render_template('admin.html', current = request.path[1:],users = userList, leagueList = leagueList, leagueCount = leagueCount, active = (active if active else 'userList'))
 
 
 @app.route('/get_user_list', methods = ['POST'])

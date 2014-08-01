@@ -10,16 +10,20 @@
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li class="active"><a href="#userList" role="tab" data-toggle="tab">Team List</a></li>
+    <li class="{{ 'active' if active=='userList' else '' }}"><a href="#userList" role="tab" data-toggle="tab">Team List</a></li>
     
-    <li><a href="#ranking" role="tab" data-toggle="tab">Ranking</a></li>
+    <li class="{{ 'active' if active=='ranking' else '' }}"><a href="#ranking" role="tab" data-toggle="tab">Ranking</a></li>
 
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content">
-    <div class="tab-pane active" id="userList">
+    <div class="tab-pane {{ 'active' if active=='userList' else '' }}" id="userList">
       <table class="table text-center">
+        <colgroup>
+          <col style="width:50%;">
+          <col style="width:50%;">
+        </colgroup>
         <thead>
           <tr>
             <th class="text-center">E-mail</th>
@@ -29,7 +33,7 @@
         <tbody>
           {% for user in users %}
           <tr data-user-id="{{user['ID']}}">
-            <td>{{ user['email'] }}</td>
+            <td>{{ user['email'] }}&nbsp;{% autoescape false %}{{ '<span class="label label-success">Admin</span>' if user['userLevel']>1 else ''}}{% endautoescape %}</td>
             <td>{{ user['members'] }}</td>
             
           </tr>
@@ -39,63 +43,78 @@
     </div>
 
     
-    <div class="tab-pane" id="ranking">
+    <div class="tab-pane {{ 'active' if active=='ranking' else '' }}" id="ranking">
       <div id = "btn-new-league-wrap">
 
         <button type="button" class="btn btn-success pull-right" id="btn-new-league">Start new league</button>
       </div>
       <div class="panel-group" id="battleList">
+        {% for i in range(leagueCount) %}
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
-              <a data-toggle="collapse" data-parent="#battleList" href="#collapseOne">
-                Collapsible Group Item #1
+              <a data-toggle="collapse" data-parent="#battleList" href="#league{{i}}">
+                {{ leagueList[i]['schoolName'] }}&nbsp;({{ leagueList[i]['createdTime'] }})
               </a>
             </h4>
           </div>
-          <div id="collapseOne" class="panel-collapse collapse in">
+          <div id="league{{i}}" class="panel-collapse collapse {{'in' if not i else ''}}">
             <div class="panel-body">
-              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+              <div class="list-group" data-league-id="{{ leagueList[i]['ID'] }}">
+                {% for rank in leagueList[i]['ranking'] %}
+                <a class="btn-show-battle-results list-group-item" href="#" data-winner-id="{{rank['winnerId']}}">{{ rank['teamMembers'].decode('utf-8') }}
+                  <span class="pull-right label label-success">
+                    {{ rank['winCount'] }} Wins</span></a>
+
+                    {% endfor %}
+                  </div>
+                </div>
+
+              </div>
             </div>
+            {% endfor %}
+
+
           </div>
         </div>
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <a data-toggle="collapse" data-parent="#battleList" href="#collapseTwo">
-                Collapsible Group Item #2
-              </a>
-            </h4>
+      </div>
+
+
+    </div>
+
+
+    {% endblock %}
+    {% block footer %}
+    <script src="{{url_for('static',filename='js/admin.js')}}"></script>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="battle-result-list" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title" id="myModalLabel"></h4>
           </div>
-          <div id="collapseTwo" class="panel-collapse collapse">
-            <div class="panel-body">
-              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-            </div>
+          <div class="modal-body text-center">
+            <table class="table table-striped table-condensed">
+              <thead>
+                <tr>
+                  <th class="text-center">Team 1</th>
+                  <th class="text-center">Team 2</th>
+                  <th class="text-center">Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+              </tbody>
+            </table>
           </div>
-        </div>
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h4 class="panel-title">
-              <a data-toggle="collapse" data-parent="#battleList" href="#collapseThree">
-                Collapsible Group Item #3
-              </a>
-            </h4>
-          </div>
-          <div id="collapseThree" class="panel-collapse collapse">
-            <div class="panel-body">
-              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-            </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
         </div>
       </div>
     </div>
-  </div>
+    {% endblock %}
 
-
-</div>
-
-
-{% endblock %}
-{% block footer %}
-<script src="{{url_for('static',filename='js/admin.js')}}"></script>
-{% endblock %}

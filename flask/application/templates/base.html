@@ -34,16 +34,16 @@
 			<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse" id="navbar-main">
 				<ul class="nav navbar-nav">
-					<li class="{{ 'active' if current == 'code' else '' }}"><a href="code">Code Management</a></li>
-					<li class="{{ 'active' if current == 'test' else '' }}"><a href="test">Code Test</a></li>
-					<li class="{{ 'active' if current == 'ship' else '' }}"><a href="ship">Ship Placement</a></li>
+					<li class="{{ 'active' if current == 'code' else '' }}"><a href="/code">Code Management</a></li>
+					<li class="{{ 'active' if current == 'test' else '' }}"><a href="/test">Code Test</a></li>
+					<li class="{{ 'active' if current == 'ship' else '' }}"><a href="/ship">Ship Placement</a></li>
 				</ul>
 				
 				<ul class="nav navbar-nav navbar-right ">
 					{% if 'userlevel' in session and session['userlevel'] > 1 %}
-					<li class="{{ 'active' if current == 'admin' else '' }}"><a href="admin">Admin</a></li>
+					<li class="{{ 'active' if current == 'admin' else '' }}"><a href="/admin">Admin</a></li>
 					{% endif %}
-					<li><a href="logout">Logout</a></li>
+					<li><a href="/logout">Logout</a></li>
 				</ul>
 				{% block submitcode %}{% endblock %}
 			</div><!-- /.navbar-collapse -->

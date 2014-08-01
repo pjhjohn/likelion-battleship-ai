@@ -28,7 +28,7 @@ def guess(result):
     #while result.get_board()[y][x] < 0:
     #    x = random.randint(0,9)
     #    y = random.randint(0,9)
-
+    print 2
     return (x,y)
 
     #-- to here --

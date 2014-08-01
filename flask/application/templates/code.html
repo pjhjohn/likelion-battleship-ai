@@ -23,7 +23,7 @@
 			<div class="panel-heading">
 				<h4 class="panel-title">
 					<a data-toggle="collapse" data-parent="#code-list" href="#collapse{{ i }}">
-						{{ files[i]['uploadedTime'] }}{% if not i %}&nbsp;(Latest code){% endif %}
+						{{ files[i]['uploadedTime'] }}{% if not i %}&nbsp;(Latest code){% endif %}{% autoescape false %}{{ '<span class="label label-danger pull-right">error</span>' if files[i]['hasError']==1 else '' }}{% endautoescape %}
 					</a>
 				</h4>
 			</div>
