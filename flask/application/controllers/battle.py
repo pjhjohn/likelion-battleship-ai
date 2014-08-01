@@ -1,4 +1,4 @@
-from flask import session, g, request
+from flask import session, g, request, render_template
 from application import app
 from application.lib.auth import *
 from application.models import database, battle_management, code_management, ship_management, user_management
@@ -29,6 +29,19 @@ def get_battle_list():
 
     return dumps(battle_management.get_battle_list(leagueId, winnerId))
 
+@app.route('/visualize',methods = ["GET","POST"], defaults = {'battleId':0})
+@app.route('/visualize/<battleId>', methods = ["GET","POST"])
+def visualize(battleId):
+    if request.method == 'POST':
+        # use form for get log
+        log = request.form['log']
+    else:
+        logFile = open(LOGS_DIR+'/'+str(battleId)+'.json')
+        log = logFile.read()
+        logFile.close()
+
+    return render_template('visualize.html',log = log)
+    
     
 
 def new_league(schoolId):
@@ -51,7 +64,13 @@ def new_league(schoolId):
         userData = {}
         userData[KEY_USER_ID] = user[COL_ID]
         userData[KEY_AI_MODULE] = code_management.get_latest_code(userData[KEY_USER_ID])
+
+
+
         userData[KEY_SHIP_PLACEMENT] = ship_management.get_last_placement(userData[KEY_USER_ID])
+
+        if not userData[KEY_AI_MODULE] or not userData[KEY_SHIP_PLACEMENT]:
+            continue
         userList.append(userData)
         
 

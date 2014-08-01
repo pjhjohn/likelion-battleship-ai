@@ -30,11 +30,12 @@ COL_PLACEMENT = 'placement'
 UPLOAD_DIR = 'uploads'
 UPLOAD_PREFIX = 'with_header_'
 LOGS_DIR = 'application/static/logs'
+TEMP_DIR = 'tmp/'
 
 
-TEMP_CODE_FILE_NAME = 'tmp/temp_code.py'
-TEMP_CODE_FILE_NAME_1 = 'tmp/temp_code_1.py'
-TEMP_CODE_FILE_NAME_2 = 'tmp/temp_code_2.py'
+#TEMP_CODE_FILE_NAME = 'tmp/temp_code.py'
+#TEMP_CODE_FILE_NAME_1 = 'tmp/temp_code_1.py'
+#TEMP_CODE_FILE_NAME_2 = 'tmp/temp_code_2.py'
 
 CODE_HEADER_FILE_NAME = 'tmp/code_header'
 

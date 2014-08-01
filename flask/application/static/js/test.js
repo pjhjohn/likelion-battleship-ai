@@ -39,7 +39,7 @@ function run_test(data){
 		data,
 		function(response){
 			var log = $.parseJSON(response);
-			var lastLog = log[log.length-1];
+			var lastLog = log['history'][log['history'].length-1];
 
 			if (lastLog['player'] == 1) {
 				if (!lastLog['sink']) {
@@ -55,6 +55,14 @@ function run_test(data){
 			} else {
 				show_toast('Uou lose','warning');
 			}
+
+			show_confirm('Do you want to visualize this battle?','default',function(check){
+				if (check) {
+					$('body').append('<form id="form-visualize" action="/visualize" method="post" target="_blank"><textarea name="log" id="" cols="30" rows="10">'+response+'</textarea></form>');
+					$("#form-visualize").submit();
+					$("#form-visualize").remove();
+				}
+			});
 		}).always(function(){
 			hide_progress();
 			$("#btn-form-submit").removeAttr('disabled');

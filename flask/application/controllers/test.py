@@ -19,32 +19,39 @@ def run_test():
 
     headerCode = get_header_code()
 
-    tempFile = open(TEMP_CODE_FILE_NAME_1, 'w')
+    tempFileName = os.tempnam(TEMP_DIR,'test')+".py"
+
+    tempFile = open(tempFileName, 'w')
     tempFile.write(headerCode)
     tempFile.write(testCode)
     tempFile.close()
 
-    testModule = import_from_file(TEMP_CODE_FILE_NAME_1)
+    try:
+        testModule = import_from_file(tempFileName)
+    except:
+        os.remove(tempFileName)
+        raise
     
 
 
 
 
     if enemyCodeType == 'custom':
+        tempFileName2 = os.tempnam(TEMP_DIR,'test2')+".py"
         enemyCode = request.form[KEY_ENEMY_CODE].encode('utf8')
-        tempFile = open(TEMP_CODE_FILE_NAME_2, 'w')
+        tempFile = open(tempFileName2, 'w')
         tempFile.write(headerCode)
         tempFile.write(enemyCode)
         tempFile.close()
 
-        enemyModule = import_from_file(TEMP_CODE_FILE_NAME_2)
-        os.remove(TEMP_CODE_FILE_NAME_2)
+        enemyModule = import_from_file(tempFileName2)
+        os.remove(tempFileName2)
     elif enemyCodeType == 'test':
-        enemyModule = import_from_file(TEMP_CODE_FILE_NAME_1)
+        enemyModule = import_from_file(tempFileName)
     else:
         enemyModule = ai
 
-    os.remove(TEMP_CODE_FILE_NAME_1)
+    os.remove(tempFileName)
 
     return test_battle(testModule, enemyModule)
 

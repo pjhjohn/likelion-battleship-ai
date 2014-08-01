@@ -43,7 +43,7 @@ function show_battle_list(leagueId, winnerId, winnerMembers) {
             $("#battle-result-list .modal-title").text(winnerMembers);
             var tbody = $("#battle-result-list .modal-body table tbody").empty();
             for ( var i in jsonData ) {
-                tbody.append('<tr><td>'+jsonData[i]['teamMembers1']+'</td><td>'+jsonData[i]['teamMembers2']+'</td><td><span class="label '+(jsonData[i]['winnerId'] == winnerId? 'label-success' : 'label-warning')+'">'+(jsonData[i]['winnerId'] == winnerId? 'Win' : 'Lose')+'</span></td></tr>');
+                tbody.append('<tr><td>'+jsonData[i]['teamMembers1']+'</td><td>'+jsonData[i]['teamMembers2']+'</td><td><span class="label '+(jsonData[i]['winnerId'] == winnerId? 'label-success' : 'label-warning')+'">'+(jsonData[i]['winnerId'] == winnerId? 'Win' : 'Lose')+'</span></td><td><a href="/visualize/'+jsonData[i]['ID']+'" target="_blank" class="btn btn-info btn-xs">Visualize</a></td></tr>');
             }
             $("#battle-result-list").modal('show');
         }

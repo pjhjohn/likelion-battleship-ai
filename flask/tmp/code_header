@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 import random
 from application.lib.game import result
 from application.lib.game import const as constant 

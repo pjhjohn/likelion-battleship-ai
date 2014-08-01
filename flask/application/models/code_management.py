@@ -74,14 +74,13 @@ def get_latest_code_file_name(userId, withHeader = False):
 # return latest code file as module
 def get_latest_code(userId):
     
-    fileName = get_latest_code_file_name(userId, True)
-    
-    return import_from_file(get_code_path(userId)+fileName+".py")
+    try:
+        fileName = get_latest_code_file_name(userId, True)
 
-    #userai = imp.load_source(str(uuid.uuid4()),get_code_path(userId)+fileName+".py")
-    
+        return import_from_file(get_code_path(userId)+fileName+".py")
+    except:
+        return None
 
-    #return userai
 
 def import_from_file(filePath):
     return imp.load_source(str(uuid.uuid4()), filePath)

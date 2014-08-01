@@ -26,13 +26,13 @@ $(document).ready(function(){
     });
 
     $(document).on('click','table.ship-placement.editable td',function onCellClicked(){
-        if (currentCell.hasClass('active') && !currentCell.hasClass('error') && remainShips[currentShipType]>0) {
+        if (currentCell.hasClass('active') && !currentCell.hasClass('error') && !currentCell.hasClass('placed') && remainShips[currentShipType]>0) {
             $('table.ship-placement.editable td.active')
-            .data('shipType',currentShipType)
-            .data('isHorizontal',isHorizontal)
-            .data('placementCode',placementCode)
-            .addClass('placed')
-            .removeClass('active');
+                .data('shipType',currentShipType)
+                .data('isHorizontal',isHorizontal)
+                .data('placementCode',placementCode)
+                .addClass('placed')
+                .removeClass('active');
             placementCode++;
 
             remainShips[currentShipType]--;
@@ -99,15 +99,15 @@ $(document).ready(function(){
         } else if (e.which == 88) {
             var pCode = currentCell.data('placementCode');
             var removedShipType = currentCell.data('shipType');
-            console.log(removedShipType);
-            $('table.ship-placement.editable td').each(function(){
+            //console.log(removedShipType);
+            $('table.ship-placement.editable td.placed').each(function(){
                 if ($(this).data('placementCode') == pCode){
                     $(this).removeClass('placed');
                     $(this)
-                    .removeClass('startPoint')
-                    .removeData('shipType')
-                    .removeData('isHorizontal')
-                    .removeData('placementCode');
+                        .removeClass('startPoint')
+                        .removeData('shipType')
+                        .removeData('isHorizontal')
+                        .removeData('placementCode');
                 }
             });
 
@@ -120,6 +120,8 @@ $(document).ready(function(){
 
 
             $('label[for=ship'+removedShipType+']').find('.remainShipCount').text(remainShips[removedShipType]);
+
+
 
         } else if ( e.which == 192 || e.which == 48 ) {
             $('#ship0').click();
