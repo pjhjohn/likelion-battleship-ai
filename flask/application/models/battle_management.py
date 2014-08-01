@@ -11,8 +11,12 @@ def get_school_id(leagueId):
 
 def insert_result(leagueId, uid1, uid2, log):
     winner = log[-1][KEY_PLAYER]
-    query = "INSERT INTO battleResult (leagueId, userId1, userId2, winnerId) VALUES ('"+str(leagueId)+"','"+str(uid1)+"','"+str(uid2)+"','"+str(uid1 if winner == 1 else uid2)+"')"
-
+    if not log[-1][KEY_SINK]:
+        winner = (uid1 if winner==2 else uid2)
+    else:
+        winner = (uid1 if winner==1 else uid2)
+    query = "INSERT INTO battleResult (leagueId, userId1, userId2, winnerId) VALUES ('"+str(leagueId)+"','"+str(uid1)+"','"+str(uid2)+"','"+str(winner)+"')"
+ 
     res = insert_query(query)
     battleResultId = res.connection.insert_id()
     logFile = open(LOGS_DIR + '/' + str(battleResultId)+'.json','w')

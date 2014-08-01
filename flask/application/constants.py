@@ -14,6 +14,7 @@ KEY_WINNER_ID = 'winnerId'
 KEY_TEST_ENEMY_TYPE = 'enemy-type'
 KEY_TEST_CODE = 'code-test'
 KEY_ENEMY_CODE = 'code-enemy'
+KEY_SINK = 'sink'
 
 
 COL_ID = 'ID'
