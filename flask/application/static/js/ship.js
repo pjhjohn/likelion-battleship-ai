@@ -163,11 +163,11 @@ $(document).ready(function(){
             .each(function(){
                 data.push({
                     location:{
-                        x:$(this).data('col'),
-                        y:$(this).parent().data('row')
+                        y:$(this).data('col'),
+                        x:$(this).parent().data('row')
                     },
                     size:shipSizes[$(this).data('shipType')],
-                    direction:$(this).data('isHorizontal')?'x':'y'
+                    direction:$(this).data('isHorizontal')?'y':'x'
                 });
             });
         data = JSON.stringify(data);
