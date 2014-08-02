@@ -17,17 +17,23 @@ class Board:
                 else:
                     self.board[ coordinate['y'] ][ coordinate['x'] ] = battleship.ship_id # change occupied tile to 1
 
+    def print_battleships(self):
+        for battleship in self.battleships:
+            print "ID: %d, Size: %d, Health: %d" %(battleship.ship_id, battleship.size, battleship.health)
+
     def hit( self, player, guess ):
         """
         check if guess hit
         guess : (dic) guess location
         """
         if ( guess['x'] > 9 or guess['x'] < 0 ) or ( guess['y'] > 9 or guess['y'] < 0 ):
+            # raise ValueError("Your guess (%d,%d) is out of the board." %(guess['x'],guess['y']))
             return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":-2, "sink":None}
 
         else:
             coordinate = self.board[ guess['y'] ][ guess['x'] ]
             if coordinate < 0:
+                # raise ValueError("You already guessed (%d,%d)." %(guess['x'],guess['y'])) 
                 return {"player":player, "guess":{"x":guess['x'],"y":guess['y']}, "result":-1, "sink":None}
 
             elif coordinate == 0:

@@ -47,6 +47,15 @@ def make_fleet(battleships):
             fleet.append(Battleship(bs["size"],bs["direction"],dict(bs["location"]), bs["size"]))
     return fleet
 
+def print_board(board):
+    for row in board:
+        for col in row:
+            if col >= 0:
+                print " ",col,
+            else:
+                print "",col,
+        print "\n"
+
 def convert_board(board):
 
     board_copy = []
@@ -109,7 +118,11 @@ def game( battleships1, battleships2, ai1, ai2 ):
             if hit1 == 3:
                 break
 
-        if hit1 == 3 or hit1 == -1 or hit1 == -2:
+        if hit1 == 3:
+            break
+        elif hit1 == -1:
+            break
+        elif hit1 == -2:
             break
 
         while hit2 > 0:
@@ -124,7 +137,11 @@ def game( battleships1, battleships2, ai1, ai2 ):
             if hit2 == 3:
                 break
 
-        if hit2 == 3 or hit2 == -1 or hit2 == -2:
+        if hit2 == 3:
+            break
+        elif hit2 == -1:
+            break
+        elif hit2 == -2:
             break
 
     return log.get_log()

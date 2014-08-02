@@ -8,8 +8,9 @@ class Result:
     def __init__( self, board ):
         self.board = board
         self.history = []
+        self.data = {}
 
-    def get_last_result(self):
+    def get_last_log(self):
         """
         return the last result dict
         """
@@ -18,15 +19,20 @@ class Result:
         else:
             return {}
 
-    def get_history( self, last_n ):
+    def get_last_nth_log( self, last_n ):
         """
         return last nth result
         """
         history_count = len(self.history)
-        if history_count < last_n :
+        if not last_n.isdigit():
+            return {}
+        elif history_count < last_n or last_n < 1:
             return {}
         else:
             return dict(self.history[(history_count - last_n)])
+
+    def get_history():
+        return list(self.history)
 
     def get_board( self ):
         """
@@ -34,11 +40,16 @@ class Result:
         """
         return list(self.board)
 
-    def get_coordinate( self, x, y ):
+    def get_coordinate_status( self, x, y ):
         """
         return the status of certain coordinate
         """
-        return int(self.board[y][x])
+        if not x.isdigit() or not y.isdigit():
+            return []
+        elif not ((0 <= x < 10) and (0 <= y < 10)):
+            return []
+
+        return int(self.board[x][y])
 
     def get_remaining_ships( self ):
         """
@@ -50,15 +61,15 @@ class Result:
                 remaining.remove(result["sink"])
         return remaining
 
-    def get_sinking_locations_and_ships_info( self ):
+    def get_sinking_locations_and_ships( self ):
         """
         return all sinking locations of ships
-        return : (dict)"location": {"x":,"y"}, "sink": sinking ship id
+        return : (dict)"location": {"x":,"y"}, "id": sinking ship id
         """
         sink = []
         for result in self.history:
             if result["result"] == 2:
-                sink.append({"location":result["guess"], "sink":result["sink"]})
+                sink.append({"location":result["guess"], "id":result["sink"]})
         return sink
 
     def get_sinking_location_by_ship_id( self, ship_id ):
@@ -66,11 +77,15 @@ class Result:
         return the last hit location of the ship by ship_id.
         If ship is still alive, return empty dict.
         """
-        for result in self.history:
-            if result["sink"] == ship_id:
-                return dict(result["guess"])
+        if not ship_id.isdigit():
+            return {}
+        elif not ( 1 <= ship_id <= 5 ):
+            return {}
         else:
-            {}
+            for result in self.history:
+                if result["sink"] == ship_id:
+                    return dict(result["guess"])
+        return {}
 
     def update_board( self, board ):
         self.board = board
