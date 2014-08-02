@@ -13,7 +13,7 @@ def guess(result):
 #-- user needs to write from here --
 
     board = result.board
-    last_result = result.get_last_result()
+    last_result = result.get_last_log()
 
     emptyPoints = []
     for i in range(10):
@@ -21,7 +21,7 @@ def guess(result):
             if not board[i][j]:
                 emptyPoints.append((i,j))
 
-    y,x = random.sample(emptyPoints,1)[0]
+    x,y = random.sample(emptyPoints,1)[0]
 
 
 #-- to here --
