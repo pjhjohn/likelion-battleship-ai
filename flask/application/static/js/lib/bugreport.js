@@ -40,9 +40,6 @@ $(document).ready(function(){
         });
     });
 
-    $(document).on('keydown',function(e){
-        if (e.which == 66 && e.ctrlKey) {
-            $("#modal-bug-report").modal('show');
-        }
-    });
+    $('body').append('<button style="position:fixed;right:20px;bottom:20px;z-index:9999;" type="button" class="btn btn-warning" data-toggle="modal" data-target="#modal-bug-report">Bug Report</button>');
+    
 });
