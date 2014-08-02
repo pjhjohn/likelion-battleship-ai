@@ -57,4 +57,7 @@ def run_test():
 
 def test_battle(testModule, enemyModule):
     placement = ship_management.get_last_placement(session[KEY_USER_ID])
-    return game.game(placement, placement, testModule, enemyModule).get_log()
+    if not placement:
+        return '1'
+    else:
+        return game.game(placement, placement, testModule, enemyModule).get_log()

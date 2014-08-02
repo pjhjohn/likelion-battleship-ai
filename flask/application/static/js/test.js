@@ -38,6 +38,10 @@ function run_test(data){
 		'/run_test',
 		data,
 		function(response){
+			if (response == '1') {
+				show_toast('You have to place ship first','error');
+				return false;
+			}
 			var log = $.parseJSON(response);
 			var lastLog = log['history'][log['history'].length-1];
 
@@ -46,14 +50,14 @@ function run_test(data){
 					if (between (lastLog["guess"]["x"], 0, 9) && between(lastLog["guess"]["y"],0,9)) {
 						show_toast("You shoot same point twice","error");
 					} else {
-						show_toast("You shoot out of board")
+						show_toast("You shoot out of board","error")
 					}
 				} else {
 					show_toast('You win','success');
 				}
 
 			} else {
-				show_toast('Uou lose','warning');
+				show_toast('You lose','warning');
 			}
 
 			show_confirm('Do you want to visualize this battle?','default',function(check){
@@ -68,9 +72,9 @@ function run_test(data){
 			$("#btn-form-submit").removeAttr('disabled');
 
 		}).fail(function(xhr, status, error){
-			show_toast('Code error','error');
-			var errorWindow = window.open("", '_blank');
-			errorWindow.document.write(xhr.responseText);
+			show_toast('Python syntax error or other exception','error');
+			//var errorWindow = window.open("", '_blank');
+			//errorWindow.document.write(xhr.responseText);
 
 
 		});

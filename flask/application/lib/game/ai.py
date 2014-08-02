@@ -15,16 +15,14 @@ def guess(result):
     board = result.board
     last_result = result.get_last_result()
 
-    if "result" in last_result:
-        x = last_result["guess"]["x"] + 1
-        y = last_result["guess"]["y"]
-    else:
-        x = 0
-        y = 0
+    emptyPoints = []
+    for i in range(10):
+        for j in range(10):
+            if not board[i][j]:
+                emptyPoints.append((i,j))
 
-    if x > 9:
-        x = 0
-        y = y + 1
+    y,x = random.sample(emptyPoints,1)[0]
+
 
 #-- to here --
 

@@ -340,8 +340,8 @@
 		var player2 = [];
 
 		for (var i=0; i<5; i++){
-			player2[i] = new Ship(board_2[i].location.x, board_2[i].location.y, board_2[i].size, board_2[i].direction);
-			player1[i] = new Ship(board_1[i].location.x, board_1[i].location.y, board_1[i].size, board_1[i].direction)
+			player1[i] = new Ship(board_2[i].location.x, board_2[i].location.y, board_2[i].size, board_2[i].direction);
+			player2[i] = new Ship(board_1[i].location.x, board_1[i].location.y, board_1[i].size, board_1[i].direction)
 		}
 		
 
@@ -487,7 +487,7 @@
 		}
 
 		function makeBomb(x, z, player){
-			if(player == 1)
+			if(player == 2)
 				mesh.position.set(x * 50 - 500 - 25, 0, z * 50 - 25);
 			else
 				mesh.position.set(x * 50 - 25, 0, z * 50 - 500 - 25);
@@ -511,7 +511,7 @@
 			else if(color == 'black')
 				shade = new THREE.Mesh( rectGeometry, rectMaterialBlack);
 
-			if (player == 1)
+			if (player == 2)
 				shade.position.set(x*50-500-25, 0, z*50-25);
 			else
 				shade.position.set(x*50-25, 0, z*50-500-25);
@@ -520,9 +520,9 @@
 
 		function getXPosition(x, size, direction, revision, player) {
 			var side;
-			if (player == 1)
+			if (player == 2)
 				side = -500;
-			else if(player == 2)
+			else 
 				side = 0;
 
 			if(direction == 'y')
@@ -533,7 +533,7 @@
 
 		function getZPosition(z, size, direction, revision, player) {
 			var side;
-			if (player == 1)
+			if (player == 2)
 				side = 0;
 			else
 				side = -500;
@@ -563,7 +563,7 @@
 					$(document).keydown(function(e){
 						if(e.keyCode == '32'){
 							//console.log(logs[logNum]);
-							var player = (logs[logNum].player == 1? 2:1);
+							var player = logs[logNum].player;
 							//console.log(player);
 
 							if(logs[logNum].result > 0){
