@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block head %}
+{{ super() }}
+<script src="{{ url_for('static',filename='syntaxhighlighter/scripts/shCore.js') }}"></script>
+<script src="{{ url_for('static',filename='syntaxhighlighter/scripts/shLegacy.js') }}"></script>
+<script src="{{ url_for('static',filename='syntaxhighlighter/scripts/shBrushPython.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static',filename='syntaxhighlighter/css/shCore.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='syntaxhighlighter/css/shCoreEmacs.css') }}">
+<link rel="stylesheet" href="{{ url_for('static',filename='css/code.css') }}">
+{% endblock %}
+{% block submitcode %}
+<form class="navbar-form navbar-right" role="search">
+
+	<button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-submit-code">Submit Code</button>
+</form>
+
+{% endblock %}
+{% block body %}
+<div class="container">
+	<div class="panel-group" id="code-list">
+		{% for i in range(filecount) %}
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+					<a data-toggle="collapse" data-parent="#code-list" href="#collapse{{ i }}">
+						{{ files[i]['uploadedTime'] }}{% if not i %}&nbsp;(Latest code){% endif %}{% autoescape false %}{{ '<span class="label label-danger pull-right">error</span>' if files[i]['hasError']==1 else '' }}{% endautoescape %}
+					</a>
+				</h4>
+			</div>
+			<div id="collapse{{ i }}" class="panel-collapse collapse {% if not i %}in{% endif %}">
+				<div class="panel-body">
+					<pre name="code" class="brush:python;">{{ files[i]['code'].decode('utf8') }}</pre>
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+
+	</div>
+</div>
+
+	{% endblock %}
+
+	{% block footer %}
+	{{ super() }}
+	<!-- Modal -->
+	<div class="modal fade" id="modal-submit-code" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<form class="modal-content" method="post" action="submit_code">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title" id="myModalLabel">Submit Code</h4>
+				</div>
+				<textarea name="new" class="modal-body form-control" placeholder="Paste code here"></textarea>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-primary">Submit</button>
+				</div>
+			</form>
+		</div>
+	</div>
+	<script src="{{ url_for('static',filename='js/code.js') }}"></script>
+	{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block head %}
+{{ super() }}
+
+<link rel="stylesheet" href="{{ url_for('static',filename='css/ship.css') }}">
+{% endblock %}
+{% block submitcode %}
+<form class="navbar-form navbar-right" role="search">
+
+	<button id="btn-show-modal" type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-submit-placement">Submit Ship Placement</button>
+</form>
+
+{% endblock %}
+{% block body %}
+<div class="container">
+	<div class="row">
+		<div class="col-md-6 col-md-offset-3">
+			
+			
+			<div class="panel-group" id="placement-list">
+				{% for i in range(placementCount) %}
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h4 class="panel-title">
+							<a data-toggle="collapse" data-parent="#placement-list" href="#collapse{{i}}">
+								{{ placementList[i]['uploadedTime'] }}&nbsp;
+								{% if not i %}(Latest placement){% endif %}
+							</a>
+						</h4>
+					</div>
+					<div id="collapse{{i}}" class="panel-collapse collapse {% if not i %}in{% endif %}">
+						<div class="panel-body">
+							{% autoescape false %}
+							{{ placementList[i]['placement'] }}
+							{% endautoescape %}
+						</div>
+					</div>
+				</div>
+				{% endfor %}
+
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+{{ super() }}
+<!-- Modal -->
+<div class="modal fade" id="modal-submit-placement" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<form class="modal-content" method="post" action="submit_placement">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				<h4 class="modal-title" id="myModalLabel">Submit Ship Placement</h4>
+			</div>
+			<div class="modal-body">
+				<label for="ship0">
+					<input id="ship0" type="radio" name="shipType" value="0" checked>
+					Ship 0(<span class="remainShipCount">1</span>)
+				</label>&nbsp;
+				<label for="ship1">
+					<input id="ship1" type="radio" name="shipType" value="1">
+					Ship 1(<span class="remainShipCount">2</span>)
+				</label>&nbsp;
+				<label for="ship2">
+					<input id="ship2" type="radio" name="shipType" value="2">
+					Ship 2(<span class="remainShipCount">1</span>)
+				</label>&nbsp;
+				<label for="ship3">
+					<input id="ship3" type="radio" name="shipType" value="3">
+					Ship 3(<span class="remainShipCount">1</span>)
+				</label><span class="hint pull-right">x : delete, r : change direction</span>
+				<table class="ship-placement editable">
+					<tr data-row="0"><td data-col="0"></td><td data-col="1"></td><td data-col="2"></td><td data-col="3"></td><td data-col="4"></td><td data-col="5"></td><td data-col="6"></td><td data-col="7"></td><td data-col="8"></td><td data-col="9"></td></tr>
+					<tr data-row="1"><td data-col="0"></td><td data-col="1"></td><td data-col="2"></td><td data-col="3"></td><td data-col="4"></td><td data-col="5"></td><td data-col="6"></td><td data-col="7"></td><td data-col="8"></td><td data-col="9"></td></tr>
+					<tr data-row="2"><td data-col="0"></td><td data-col="1"></td><td data-col="2"></td><td data-col="3"></td><td data-col="4"></td><td data-col="5"></td><td data-col="6"></td><td data-col="7"></td><td data-col="8"></td><td data-col="9"></td></tr>
+					<tr data-row="3"><td data-col="0"></td><td data-col="1"></td><td data-col="2"></td><td data-col="3"></td><td data-col="4"></td><td data-col="5"></td><td data-col="6"></td><td data-col="7"></td><td data-col="8"></td><td data-col="9"></td></tr>
+					<tr data-row="4"><td data-col="0"></td><td data-col="1"></td><td data-col="2"></td><td data-col="3"></td><td data-col="4"></td><td data-col="5"></td><td data-col="6"></td><td data-col="7"></td><td data-col="8"></td><td data-col="9"></td></tr>
+					<tr data-row="5"><td data-col="0"></td><td data-col="1"></td><td data-col="2"></td><td data-col="3"></td><td data-col="4"></td><td data-col="5"></td><td data-col="6"></td><td data-col="7"></td><td data-col="8"></td><td data-col="9"></td></tr>
+					<tr data-row="6"><td data-col="0"></td><td data-col="1"></td><td data-col="2"></td><td data-col="3"></td><td data-col="4"></td><td data-col="5"></td><td data-col="6"></td><td data-col="7"></td><td data-col="8"></td><td data-col="9"></td></tr>
+					<tr data-row="7"><td data-col="0"></td><td data-col="1"></td><td data-col="2"></td><td data-col="3"></td><td data-col="4"></td><td data-col="5"></td><td data-col="6"></td><td data-col="7"></td><td data-col="8"></td><td data-col="9"></td></tr>
+					<tr data-row="8"><td data-col="0"></td><td data-col="1"></td><td data-col="2"></td><td data-col="3"></td><td data-col="4"></td><td data-col="5"></td><td data-col="6"></td><td data-col="7"></td><td data-col="8"></td><td data-col="9"></td></tr>
+					<tr data-row="9"><td data-col="0"></td><td data-col="1"></td><td data-col="2"></td><td data-col="3"></td><td data-col="4"></td><td data-col="5"></td><td data-col="6"></td><td data-col="7"></td><td data-col="8"></td><td data-col="9"></td></tr>
+
+
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary">Submit</button>
+			</div>
+		</form>
+	</div>
+</div>
+<script src="{{ url_for('static',filename='js/lib/toast.js') }}"></script>
+<script src="{{ url_for('static',filename='js/ship.js') }}"></script>
+{% endblock %}
