@@ -21,11 +21,9 @@ def submit_code():
     if not is_login():
         return '1'
 
+    # With Code test
     add_code(session[KEY_USER_ID],request.form['new'])
     
-
-    # code test here
-
     if request.referrer and request.referrer.split('/')[-1] == 'test':
         return '0'
     return redirect(url_for('code'))

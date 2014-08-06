@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 from application.lib.game.record import Record
 from application.lib.game.board import Board
+# import sys
+# sys.setresursionlimit(2)
 
-#-- user needs to write from here --
+# ============= USER AI PROGRAM CODE =============

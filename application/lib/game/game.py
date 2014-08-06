@@ -1,147 +1,106 @@
 import operator
-from board import Board
-from battleship import Battleship
 from importlib import import_module
-from result import Result
+from attrdict import attrdict_const
+from board import Board
+from ship import Ship
+from record import Record
 from log import Log
-import const as constant
 
-constant.STATUS_MISSED  = -2
-constant.STATUS_HIT     = -1
-constant.STATUS_EMPTY   = 0
-
-constant.RESULT_INVALID = -2
-constant.RESULT_TWICE   = -1
-constant.RESULT_MISSED  = 0
-constant.RESULT_HIT     = 1
-constant.RESULT_SINK    = 2
-constant.RESULT_WIN     = 3
-
-def make_fleet(battleships):
-    battleships.sort(key=operator.itemgetter("size"))
-    
+def build_fleet(ships):
+    # Sorted by size in increment order
+    ships.sort(key=operator.itemgetter("size"))
+    # Length Check
+    if not len(ships) == 5 :
+        raise ValueError("# of ships are below 5. You got %d" % len(ships))
+    # Size Check
+    size_check = [2, 3, 3, 4, 5]
+    for ship in ships :
+        try : size_check.remove(ship['size'])
+        except : raise ValueError("Exceed in size %d battleship" % ship['size'])
+    # Build Fleet
     fleet = []
-    size = [2,3,3,4,5]
-    size3_id = [2,3]
-
-    for bs in battleships:
-        if bs["size"] == 3:
-            try:
-                size.remove(3)
-            except:
-                raise ValueError("There are more than two size 3 battleships.")
-            fleet.append(Battleship(bs["size"],bs["direction"],dict(bs["location"]), size3_id.pop(0)))
-
-        elif bs["size"] == 2:
-            try:
-                size.remove(2)
-            except:
-                raise ValueError("There are more than one size 2 battleship.")
-            fleet.append(Battleship(bs["size"],bs["direction"],dict(bs["location"]), 1))
-
-        else:
-            try:
-                size.remove(bs["size"])
-            except:
-                raise ValueError("There are more than one size %d battleship." %bs["size"])
-            fleet.append(Battleship(bs["size"],bs["direction"],dict(bs["location"]), bs["size"]))
+    ids = [1, 2, 3, 4, 5]
+    for index in range(len(ships)) :
+        ship = ships[index]
+        ship_id = ids[index]
+        fleet.append(Ship(ship['size'], dict(ship['location']), ship['direction'], ship_id))
     return fleet
 
-def print_board(board):
-    for row in board:
-        for col in row:
-            if col >= 0:
-                print " ",col,
-            else:
-                print "",col,
-        print "\n"
-
-def convert_board(board):
-
-    board_copy = []
-
-    for x in range(10):  
-        board_copy.append( [0] * 10 )
-
-    for row in range(10):
-        for col in range(10):
-            board_copy[row][col] = board[row][col] 
-
-    for row in range(10):
-        for col in range(10):
-            if board_copy[row][col] > 0:
-                board_copy[row][col] = 0
-
-    return board_copy
-
-def game( battleships1, battleships2, ai1, ai2 ):
+def game(fleet1, fleet2, player_code1, player_code2):
     """
     battleships1 : Player1's list of battleship from front-end
     battleships2 : Player2's list of battleship from front-end
     ai1 : Player1's ai file name (+path)
     ai2 : Player2's ai file name (+path)
     """
-
-    battleships1.sort(key=operator.itemgetter("size"))
-    battleships2.sort(key=operator.itemgetter("size"))
-
-    log = Log({"player1":battleships1, "player2":battleships2})
-
-    #ai1 = import_module(ai1)
-    #ai2 = import_module(ai2)
-
-    gb1 = Board(make_fleet(battleships2))
-    gb2 = Board(make_fleet(battleships1))
-
-    results1 = Result(convert_board(gb1.board))
-    results2 = Result(convert_board(gb2.board))
-
-    turn = 0
-
-    turn1 = 0
-    turn2 = 0
-
-    while( gb1.remaining > 0 and gb2.remaining > 0 ):
-
-        hit1 = 1
-        hit2 = 1
-
-        while hit1 > 0:
+    # INIT Player 1 & 2
+    player_module1 = import_module(player_code1)
+    player_module2 = import_module(player_code2)
+    fleet1.sort(key = operator.itemgetter('size'))
+    fleet2.sort(key = operator.itemgetter('size'))
+    board1 = Board(build_fleet(fleet2))
+    board2 = Board(build_fleet(fleet1))
+    record1 = Record(board1.convert())
+    record2 = Record(board2.convert())
+    # INIT Others
+    log = Log({'player1':fleet1, 'player2':fleet2})
+    turn1, turn2 = 0, 0
+    # Game Loop
+    while board1.remaining > 0 and board2.remaining > 0 :
+        hit1, hit2 = 1, 1
+        while hit1 > 0 :
             turn1 += 1
+            print 'Turn %d for player 1' % turn1
             guess1 = {}
-            guess1['x'], guess1['y'] = ai1.guess(results1)
-            last_result = gb1.hit(1, guess1)
-            log.history.append(last_result)
-            results1.update_board(convert_board(gb1.board)) 
-            results1.history.append({"guess":last_result["guess"],"result":last_result["result"],"sink":last_result["sink"]})
-            hit1 = last_result["result"]
+            guess1['x'], guess1['y'] = player_module1.guess(record1)
+            last_record = board1.hit(1, guess1)
+            log.history.append(last_record)
+            record1.update_board(board1.convert())
+            print last_record
+            board1.show()
+            record1.history.append({'guess':last_record['guess'], 'result':last_record['result'], 'sink':last_record['sink']})
+            hit1 = last_record['result']
             if hit1 == 3:
                 break
+            print
 
-        if hit1 == 3:
+        if hit1 == 3 :
+            print "Player 1 Won!"
             break
-        elif hit1 == -1:
-            break
-        elif hit1 == -2:
+        elif hit1 in [-2, -1] :
+            print "Player 1 Lost! (Player1 hit ", ["invalid location)","the same location twice)"][hit1+2]
             break
 
-        while hit2 > 0:
+        while hit2 > 0 :
             turn2 += 1
+            print 'Turn %d for player 2' % turn2
             guess2 = {}
-            guess2['x'], guess2['y'] = ai2.guess(results2)
-            last_result = gb2.hit(2, guess2)
-            log.history.append(last_result)
-            results2.update_board(convert_board(gb2.board))
-            results2.history.append({"guess":last_result["guess"],"result":last_result["result"],"sink":last_result["sink"]})
-            hit2 = last_result["result"]
+            guess2['x'], guess2['y'] = player_module2.guess(record2)
+            last_record = board2.hit(2, guess2)
+            log.history.append(last_record)
+            record2.update_board(board2.convert())
+            print last_record
+            board2.show()
+            record2.history.append({'guess':last_record['guess'], 'result':last_record['result'], 'sink':last_record['sink']})
+            hit2 = last_record['result']
             if hit2 == 3:
                 break
+            print
 
-        if hit2 == 3:
+        if hit2 == 3 :
+            print "Player 2 Won!"
             break
-        elif hit2 == -1:
-            break
-        elif hit2 == -2:
+        elif hit2 in [-2, -1] :
+            print "Player 2 Lost! (Player2 hit ", ["invalid location)","the same location twice)"][hit2+2]
             break
 
     return log
+
+# Test Code
+if __name__ == '__main__' :
+    ships1 = [{"location":{"x":1,"y":1},"size":2,"direction":"x"},{"location":{"x":4,"y":2},"size":4,"direction":"y"},{"location":{"x":7,"y":3},"size":3,"direction":"x"},{"location":{"x":2,"y":4},"size":3,"direction":"y"},{"location":{"x":5,"y":7},"size":5,"direction":"x"}]
+    ships2 = [{"location":{"x":1,"y":1},"size":2,"direction":"x"},{"location":{"x":1,"y":4},"size":4,"direction":"x"},{"location":{"x":1,"y":3},"size":3,"direction":"x"},{"location":{"x":1,"y":2},"size":3,"direction":"x"},{"location":{"x":5,"y":9},"size":5,"direction":"x"}]
+
+    ai1, ai2 = "ai_1", "ai_2"
+    print game(ships1, ships2, ai1, ai2)
+    print game(ships2, ships1, ai2, ai1)
