@@ -7,7 +7,4 @@ class Log:
 
     def get_log(self, to_string = True):
     	log = {"fleet" : self.fleet, "history" : self.history }
-    	if to_string :
-    		return json.dumps(log)
-    	else:
-    		return log
+    	return [log, json.dumps(log)][to_string]

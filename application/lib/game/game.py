@@ -1,9 +1,7 @@
 import operator
-from importlib import import_module
-from attrdict import attrdict_const
+from record import Record
 from board import Board
 from ship import Ship
-from record import Record
 from log import Log
 
 def build_fleet(ships):
@@ -26,7 +24,7 @@ def build_fleet(ships):
         fleet.append(Ship(ship['size'], dict(ship['location']), ship['direction'], ship_id))
     return fleet
 
-def game(fleet1, fleet2, player_code1, player_code2):
+def play(fleet1, fleet2, player_module1, player_module2):
     """
     battleships1 : Player1's list of battleship from front-end
     battleships2 : Player2's list of battleship from front-end
@@ -34,8 +32,6 @@ def game(fleet1, fleet2, player_code1, player_code2):
     ai2 : Player2's ai file name (+path)
     """
     # INIT Player 1 & 2
-    player_module1 = import_module(player_code1)
-    player_module2 = import_module(player_code2)
     fleet1.sort(key = operator.itemgetter('size'))
     fleet2.sort(key = operator.itemgetter('size'))
     board1 = Board(build_fleet(fleet2))
@@ -102,5 +98,5 @@ if __name__ == '__main__' :
     ships2 = [{"location":{"x":1,"y":1},"size":2,"direction":"x"},{"location":{"x":1,"y":4},"size":4,"direction":"x"},{"location":{"x":1,"y":3},"size":3,"direction":"x"},{"location":{"x":1,"y":2},"size":3,"direction":"x"},{"location":{"x":5,"y":9},"size":5,"direction":"x"}]
 
     ai1, ai2 = "ai_1", "ai_2"
-    print game(ships1, ships2, ai1, ai2)
-    print game(ships2, ships1, ai2, ai1)
+    print play(ships1, ships2, ai1, ai2)
+    print play(ships2, ships1, ai2, ai1)

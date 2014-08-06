@@ -1,5 +1,4 @@
-from attrdict import attrdict_const
-
+from application.lib.attrdict import attrdict_const
 class Record : 
     """
     <Keys in History element>

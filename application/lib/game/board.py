@@ -1,4 +1,4 @@
-from attrdict import attrdict_const
+from application.lib.attrdict import attrdict_const
 class Board(object) :
     # Tile Status on the Board. occupied ship id in [1,2,3,4,5]
     Status = attrdict_const(MISSED=-2, HIT=-1, EMPTY=0)
