@@ -1,32 +1,32 @@
 from application.lib.attrdict import attrdict_const
 
 Key = attrdict_const(
-	USER_ID = 'userid',
-	USER_LEVEL = 'userlevel',
+	USER_ID = 'user_id',
+	USER_LEVEL = 'user_level',
 	EMAIL = 'email',
 	PASSWORD = 'password',
+	SCHOOL_ID = 'school_id',
+	LEAGUE_ID = 'league_id',
 	CODE = 'code',
-	SCHOOL_ID = 'schoolid',
-	LEAGUE_ID = 'leagueId',
-	AI_MODULE = 'aiModule',
-	SHIP_PLACEMENT = 'shipPlacement',
+	AI_MODULE = 'ai_module',
+	FLEET_DEPLOYMENT = 'fleet_deployment',
 	PLAYER = 'player',
 	MEMBERS = 'members',
 	RANKING = 'ranking',
-	WINNER_ID = 'winnerId',
-	TEST_ENEMY_TYPE = 'enemy-type',
-	TEST_CODE = 'code-test',
-	ENEMY_CODE = 'code-enemy',
+	WINNER_ID = 'winner_id',
+	TEST_ENEMY_TYPE = 'enemy_type',
+	TEST_CODE = 'code_test',
+	ENEMY_CODE = 'code_enemy',
 	SINK = 'sink'
 )
 Col = attrdict_const(
 	ID = 'ID',
-	USER_LEVEL = 'userLevel',
-	UPLOADED_TIME = 'uploadedTime',
+	USER_LEVEL = 'user_level',
+	UPLOADED_TIME = 'uploaded_time',
 	FILE_NAME = 'file_name',
-	SCHOOL_NAME = 'schoolName',
-	SCHOOL_ID = 'schoolId',
-	PLACEMENT = 'placement',
+	SCHOOL_NAME = 'school_name',
+	SCHOOL_ID = 'school_id',
+	DEPLOYMENT = 'deployment',
 )
 Level = attrdict_const(
 	SCHOOL_ADMIN = 2,
@@ -41,4 +41,3 @@ Path = attrdict_const(
 	TEMP = 'tmp/',
 	CODE_HEADER_FILE_NAME = 'tmp/code_header'
 )
-# TODO POTENTIAL MISMATCH BTW CONST AND DB VARIABLE

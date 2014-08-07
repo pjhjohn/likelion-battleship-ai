@@ -5,3 +5,7 @@
 .panel-title a[data-toggle="collapse"]:hover {
 	text-decoration: none;
 }
+
+* {
+	border-radius: 0px !important;
+}

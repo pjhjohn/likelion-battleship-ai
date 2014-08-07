@@ -3,6 +3,8 @@ from record import Record
 from board import Board
 from ship import Ship
 from log import Log
+# import sys
+# sys.setresursionlimit(2)
 
 def build_fleet(ships):
     # Sorted by size in increment order

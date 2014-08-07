@@ -1,0 +1,20 @@
+table.fleet-deployment {
+    width:100%;
+}
+
+table.fleet-deployment td{
+    width:10%;
+    border:1px solid #ccc;
+}
+
+table.fleet-deployment td.active {
+    background: #3cc;
+}
+
+table.fleet-deployment td.deployed {
+    background: #38c;
+}
+
+table.fleet-deployment td.error {
+    background: #c33;
+}

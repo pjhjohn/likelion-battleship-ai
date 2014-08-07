@@ -1,100 +1,67 @@
 from flask import session, g, request, render_template
 from application import app
+from application.const import *
 from application.lib.auth import *
-from application.models import database, battle_management, code_management, ship_management, user_management
 from application.lib.game import game
-from application.constants import *
-from json import loads, dumps
+from application.models import battleship_db, battle_manager, code_manager, fleet_manager, user_manager
+import json
 
 @app.route('/league', methods = ['POST'])
-def league():
-    if not is_login():
+def league() :
+    if not is_login() :
         return '1'
 
-    schoolId = session[KEY_SCHOOL_ID]
-
-    if not schoolId:
-        #error
+    school_id = session[Key.SCHOOL_ID]
+    if not school_id :
         return '1'
-    else:
-        new_league(schoolId)
+    else :
+        new_league(school_id)
         return '0'
-    
 
 @app.route('/get_battle_list', methods = ['POST'])
-def get_battle_list():
-    leagueId = request.form[KEY_LEAGUE_ID]
-    winnerId = request.form[KEY_WINNER_ID]
+def get_battle_list() :
+    league_id = request.form[Key.LEAGUE_ID]
+    winner_id = request.form[Key.WINNER_ID]
+    return json.dumps(battle_manager.get_battle_list(league_id, winner_id))
 
+@app.route('/visualize', methods = ['GET', 'POST'], defaults = {'battle_id' : 0})
+@app.route('/visualize', methods = ['GET', 'POST'])
+def visualize(battle_id) :
+    if request.method == 'POST' :
+        game_log = request.form['log']
+    else :
+        log_file = open('%s/%d.json' % (Path.LOGS, battle_id))
+        game_log = log_file.read()
+        log_file.close()
+    return render_template('visualize.html', log = game_log)
 
-    return dumps(battle_management.get_battle_list(leagueId, winnerId))
+def nes_league(school_id) :
+    query = "INSERT INTO league (school_id) VALUES ('%d')" % school_id
+    cursor = battleship_db.insert(query)
+    league_id = cursor.connection.insert_id()
 
-@app.route('/visualize',methods = ["GET","POST"], defaults = {'battleId':0})
-@app.route('/visualize/<battleId>', methods = ["GET","POST"])
-def visualize(battleId):
-    if request.method == 'POST':
-        # use form for get log
-        log = request.form['log']
-    else:
-        logFile = open(LOGS_DIR+'/'+str(battleId)+'.json')
-        log = logFile.read()
-        logFile.close()
+    where = "WHERE school_id = '%d' AND user_level = 1" % school_id
+    users = user_manager.get_users(where)
 
-    return render_template('visualize.html',log = log)
-    
-    
-
-def new_league(schoolId):
-    query = "INSERT INTO league (schoolId) VALUES ('"+str(schoolId)+"')"
-    res = database.insert_query(query)
-    leagueId = res.connection.insert_id()
-
-    where = "WHERE schoolId = '"+str(schoolId)+"' AND userLevel = 1"
-    users  = user_management.get_users(where)
-
-
-
-    userList = []
-
-
-    for user in users:
-        if user[COL_USER_LEVEL] > 1:
+    user_list = []
+    for user in users :
+        if user[Col.USER_LEVEL] > 1 :
             continue
 
-        userData = {}
-        userData[KEY_USER_ID] = user[COL_ID]
-        userData[KEY_AI_MODULE] = code_management.get_latest_code(userData[KEY_USER_ID])
-
-
-
-        userData[KEY_SHIP_PLACEMENT] = ship_management.get_last_placement(userData[KEY_USER_ID])
-
-        if not userData[KEY_AI_MODULE] or not userData[KEY_SHIP_PLACEMENT]:
+        user_data = {}
+        user_data[Key.USER_ID] = user[Col.ID]
+        user_data[Key.AI_MODULE] = code_manager.get_latest_code_module(user_data[Key.USER_ID])
+        user_data[Key.FLEET_DEPLOYMENT] = fleet_manager.get_latest_fleet(user_data[Key.USER_ID])
+        if not user_data[Key.AI_MODULE] or not user_data[Key.FLEET_DEPLOYMENT] :
             continue
-        userList.append(userData)
-        
+        user_list.append(user_data)
 
+    for playerA in user_list :
+        for playerB in user_list :
+            if playerA[Key.USER_ID] == playerB[Key.USER_ID] :
+                continue
+            execute_battle(league_id, playerA, playerB)
 
-    for user1 in userList:
-        for user2 in userList:
-            if user1[KEY_USER_ID] != user2[KEY_USER_ID]:
-                battle(leagueId, user1,user2)
-
-
-
-def battle(leagueId, user1, user2):
-    resultLog = game.game(
-            user1[KEY_SHIP_PLACEMENT],
-            user2[KEY_SHIP_PLACEMENT],
-            user1[KEY_AI_MODULE],
-            user2[KEY_AI_MODULE]
-        ).get_log(False)
-    
-    battle_management.insert_result(leagueId, user1[KEY_USER_ID], user2[KEY_USER_ID], resultLog)
-    
-
-
-
-
-
-
+def execute_battle(league_id, playerA, playerB) :
+    result_log = game.play(playerA[Key.FLEET_DEPLOYMENT], playerB[Key.FLEET_DEPLOYMENT], playerA[Key.AI_MODULE], playerB[Key.AI_MODULE]).get_log(False)
+    battle_manager.insert_result(league_id, playerA[Key.USER_ID], playerB[Key.USER_ID], result_log)

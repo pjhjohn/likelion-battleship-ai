@@ -1,4 +1,4 @@
-import threading, sys
+import threading
 
 class TimeoutError(Exception): pass
 def timeout_sec(time_in_sec) :
@@ -31,13 +31,3 @@ def timeout_sec(time_in_sec) :
 			return timer.result
 		return core
 	return wrapper
-
-if __name__ == '__main__' :
-	@timeout_sec(3)
-	def guess(a, b) :
-	    global THREAD_ACTIVE
-	    while THREAD_ACTIVE and True :
-	    	print a, b
-	    print 'do e'
-	
-	guess('what', True)

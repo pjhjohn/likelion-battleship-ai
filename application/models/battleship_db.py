@@ -3,7 +3,7 @@ from flask import g
 
 def get_db():
     if not hasattr(g,'db'):
-        g.db = pymysql.connect(host='54.193.111.125', port=3306, user='likelion', passwd='likelion', db='battleship')
+        g.db = pymysql.connect(host='54.193.111.125', port=3306, user='likelion', passwd='likelion', db='battleship_new')
         cur = g.db.cursor()
         cur.execute('SET NAMES utf8')
     return g.db

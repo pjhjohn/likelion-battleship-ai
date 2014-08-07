@@ -4,67 +4,54 @@
 		<meta charset="UTF-8">
 		<title>Battleship</title>
 		<style type="text/css">
-    		html, body {
-        		height:100%;
-        		margin:0px;
-        		padding:0px;
-        		background-color:black;        		
-    		}
-
-    		
-            #loadContents {
-            	background-color:rgb(21,25,31);
-                background-image:url('../static/visualize/res/img/loading.gif');
-                background-position: 50% 50%;
-                background-repeat:no-repeat;
-            }
-    		
+			html, body {
+				height:100%;
+				margin:0px;
+				padding:0px;
+				background-color:black;				
+			}
+			#loadContents {
+				background-color:rgb(21,25,31);
+				background-image:url('../static/visualize/res/img/loading.gif');
+				background-position: 50% 50%;
+				background-repeat:no-repeat;
+			}
 		</style>
 	</head>
 	<body>
-		<div id="container" style="display:none;">
-		</div>
-
+		<div id="container" style="display:none;"></div>
 		<div src="../static/visualize/res/img/loading.gif" id="loadContents" style="width: 100%; height: 100%; "></div>
 	</body>
 
+	<!-- Script -->
 	<script src="../static/visualize/js/three.min.js"></script>
 	<script type="text/javascript" src="../static/visualize/js/OBJLoader.js"></script>
 	<script type="text/javascript" src="../static/visualize/js/jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="../static/js/lib/toast.js"></script>
 	<script type="x-shader/x-vertex" id="vertexShader">
-		vec3 mod289(vec3 x)
-		{
-			return x - floor(x * (1.0 / 289.0)) * 289.0;
+		vec3 mod289(vec3 x) {
+			return x - floor( x * (1.0 / 289.0)) * 289.0;
 		}
-
-		vec4 mod289(vec4 x)
-		{
-			return x - floor(x * (1.0 / 289.0)) * 289.0;
+		vec4 mod289(vec4 x) {
+			return x - floor( x * (1.0 / 289.0)) * 289.0;
 		}
-
-		vec4 permute(vec4 x)
-		{
-			return mod289(((x*34.0)+1.0)*x);
+		vec4 permute(vec4 x) {
+			return mod289(((x * 34.0) + 1.0) * x);
 		}
-
-		vec4 taylorInvSqrt(vec4 r)
-		{
+		vec4 taylorInvSqrt(vec4 r) {
 			return 1.79284291400159 - 0.85373472095314 * r;
 		}
-
 		vec3 fade(vec3 t) {
-			return t*t*t*(t*(t*6.0-15.0)+10.0);
+			return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
 		}
 
 		// Classic Perlin noise
-		float cnoise(vec3 P)
-		{
-			vec3 Pi0 = floor(P); // Integer part for indexing
+		float cnoise(vec3 P) {
+			vec3 Pi0 = floor(P); 		// Integer part for indexing
 			vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
 			Pi0 = mod289(Pi0);
 			Pi1 = mod289(Pi1);
-			vec3 Pf0 = fract(P); // Fractional part for interpolation
+			vec3 Pf0 = fract(P); 		// Fractional part for interpolation
 			vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
 			vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
 			vec4 iy = vec4(Pi0.yy, Pi1.yy);
@@ -73,7 +60,7 @@
 
 			vec4 ixy = permute(permute(ix) + iy);
 			vec4 ixy0 = permute(ixy + iz0);
-			  vec4 ixy1 = permute(ixy + iz1);
+			vec4 ixy1 = permute(ixy + iz1);
 
 			vec4 gx0 = ixy0 * (1.0 / 7.0);
 			vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
@@ -128,8 +115,7 @@
 		}
 
 		// Classic Perlin noise, periodic variant
-		float pnoise(vec3 P, vec3 rep)
-		{
+		float pnoise(vec3 P, vec3 rep) {
 			vec3 Pi0 = mod(floor(P), rep); // Integer part, modulo period
 			vec3 Pi1 = mod(Pi0 + vec3(1.0), rep); // Integer part + 1, mod period
 			Pi0 = mod289(Pi0);
@@ -198,7 +184,6 @@
 		}
 
 		// Include the Ashima code here!
-
 		varying vec2 vUv;
 		varying float noise;
 		uniform float time;
@@ -214,16 +199,12 @@
 		}
 
 		void main() {
-
 			vUv = uv;
-
 			noise = 10.0 *  -.10 * turbulence( .5 * normal + time );
 			float b = 5.0 * pnoise( 0.05 * position + vec3( 2.0 * time ), vec3( 100.0 ) );
 			float displacement = - 10. * noise + b;
-
 			vec3 newPosition = position + normal * displacement;
 			gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
-
 		}
 	</script>
 
@@ -237,39 +218,26 @@
 		}
 
 		void main() {
-
 			float r = .01 * random( vec3( 12.9898, 78.233, 151.7182 ), 0.0 );
 			vec2 tPos = vec2( 0, 1.0 - 1.3 * noise + r );
 			vec4 color = texture2D( tExplosion, tPos );
 			gl_FragColor = vec4( color.rgb, 1.0 );
-
 		}
 	</script>
 
 	<script type="text/javascript" id="mainCode">
-
-		$(document).ready(function(){
+	$(document).ready(function(){
 		var response = {% autoescape false %}{{ log }}{% endautoescape %};
-
-		var container, 
-		renderer, 
-		boardScene,
-		scene, 
-		camera, 
-		mesh, 
-		start = Date.now();
-
+		var container, renderer, boardScene, scene, camera, mesh, start = Date.now();
 		var bombTime = -1;
 		var EXPIREBOMB = 30;
-
-		var 	BOARDCOLOR = 0x1C3D67,
+		var BOARDCOLOR = 0x1C3D67,
 			LINECOLOR = 0xffffff,
 			AMBIENTLIGHTCOLOR = 0x00000A,
 			DIRECTIONALLIGHTCOLOR1 = 0x5B84B1,
 			DIRECTIONALLIGHTCOLOR2 = 0x98869F,
 			CORRECTSHOOTCOLOR = 0xC66464,
 			WRONGSHOOTCOLOR = 0x888888;
-			
 
 		var board_1 = response.fleet.player1;
 		var board_2 = response.fleet.player2;
@@ -288,8 +256,6 @@
 			this.location	= {'x':x, 'z':y}
 			this.size 	= size;
 			this.direction 	= direction;
-
-
 			switch(this.size) {
 				case 2:
 					this.scaleX = 0.07;
@@ -349,8 +315,7 @@
 					this.rotation = Math.PI/2;
 					break;
 			}
-			if(this.direction == 'y')
-				this.rotation += Math.PI/2;
+			if(this.direction == 'y') this.rotation += Math.PI/2;
 		}
 		
 		var player1 = [];
@@ -360,32 +325,26 @@
 			player1[i] = new Ship(board_2[i].location.x, board_2[i].location.y, board_2[i].size, board_2[i].direction);
 			player2[i] = new Ship(board_1[i].location.x, board_1[i].location.y, board_1[i].size, board_1[i].direction)
 		}
-		
-
 		init();
 		animate();
 
 		function init(){
-	        	container = document.getElementById( "container" );
+			container = document.getElementById( "container" );
 			camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, - 500, 1000 );
 			camera.position.x = 200;
 			camera.position.y = 100;
 			camera.position.z = 200;
 
+			boardScene = new THREE.Scene();
 
-        		boardScene = new THREE.Scene();
-
-        		var boardGeometry = new THREE.BoxGeometry( 500, 5, 500 );
-		        var boardMaterial = new THREE.MeshBasicMaterial( {color: BOARDCOLOR} );
-			
+	   		var boardGeometry = new THREE.BoxGeometry( 500, 5, 500 );
+			var boardMaterial = new THREE.MeshBasicMaterial( {color: BOARDCOLOR} );
 			var board1 = new THREE.Mesh( boardGeometry, boardMaterial );
 			board1.position.set(-250, 0, 250);
 			boardScene.add(board1);
-
 			var board2 = new THREE.Mesh( boardGeometry, boardMaterial );
 			board2.position.set(250, 0, -250);
 			boardScene.add(board2);
-
 
 			scene = new THREE.Scene();
 
@@ -393,77 +352,64 @@
 			var lineGeometry = new THREE.Geometry();
 
 			for ( var i = 0; i <= size; i += step ) {
-				lineGeometry.vertices.push( new THREE.Vector3( - size, 0, i ) );
-				lineGeometry.vertices.push( new THREE.Vector3(   0, 0, i ) );
-
-				lineGeometry.vertices.push( new THREE.Vector3( -i, 0, 0) );
-				lineGeometry.vertices.push( new THREE.Vector3( -i, 0,   size ) );
+				lineGeometry.vertices.push( new THREE.Vector3( - size, 0, 	i ));
+				lineGeometry.vertices.push( new THREE.Vector3(   	0, 0, 	i ));
+				lineGeometry.vertices.push( new THREE.Vector3( -	i, 0, 	0 ));
+				lineGeometry.vertices.push( new THREE.Vector3( -	i, 0,size ));
 			}
 			for ( var i = 0; i <= size; i += step ) {
-				lineGeometry.vertices.push( new THREE.Vector3(  size, 0, -i ) );
-				lineGeometry.vertices.push( new THREE.Vector3(   0, 0, -i ) );
+				lineGeometry.vertices.push( new THREE.Vector3( size, 0, -	i ));
+				lineGeometry.vertices.push( new THREE.Vector3(	0, 0, -	i ));
+				lineGeometry.vertices.push( new THREE.Vector3(	i, 0, 	0 ));
+				lineGeometry.vertices.push( new THREE.Vector3(	i, 0, -size ));
+			}
+	   		var lineMaterial = new THREE.LineBasicMaterial( { color: LINECOLOR, opacity: 0.8 } );
 
-				lineGeometry.vertices.push( new THREE.Vector3(  i, 0, 0) );
-				lineGeometry.vertices.push( new THREE.Vector3(  i, 0,   -size ) );
+			var line = new THREE.Line( lineGeometry, lineMaterial );
+			line.type = THREE.LinePieces;
+			scene.add( line );
+
+			for(var player=1; player<3; player++){
+				for(var i=1; i<6; i++){
+					if(player == 1) shipLoader(player1[i-1], i, player);
+					else 	  		shipLoader(player2[i-1], i, player);
+				}
 			}
 
-        		var lineMaterial = new THREE.LineBasicMaterial( { color: LINECOLOR, opacity: 0.8 } );
-
-		        var line = new THREE.Line( lineGeometry, lineMaterial );
-		        line.type = THREE.LinePieces;
-		        scene.add( line );
-
-		        for(var player=1; player<3; player++){
-			        for(var i=1; i<6; i++){
-			        	if(player == 1)
-			        		shipLoader(player1[i-1], i, player);
-			        	else
-			        		shipLoader(player2[i-1], i, player);
-			        }
-			}
-
-			bombMaterial = new THREE.ShaderMaterial( {
+			bombMaterial = new THREE.ShaderMaterial({
 				uniforms: { 
-			    		tExplosion: {
-			    			type: "t", 
-			    			value: THREE.ImageUtils.loadTexture( '../static/visualize/res/img/explosion.png' )
-			    		},
-			        time: {
-			        	type: "f", 
-			        	value: 0.0 
-			        	}
+					tExplosion: { type: "t", value: THREE.ImageUtils.loadTexture( '../static/visualize/res/img/explosion.png') },
+					time: { type: "f", value: 0.0 }
 				},
 				vertexShader: document.getElementById( 'vertexShader' ).textContent,
 				fragmentShader: document.getElementById( 'fragmentShader' ).textContent
-
-			} );
+			});
 
 			mesh = new THREE.Mesh( 
-		    		new THREE.IcosahedronGeometry( 20, 4 ), 
-		    		bombMaterial
-		    	);
+				new THREE.IcosahedronGeometry( 20, 4 ), 
+				bombMaterial
+			);
 
 
-		    	var ambientLight = new THREE.AmbientLight( AMBIENTLIGHTCOLOR );
+			var ambientLight = new THREE.AmbientLight( AMBIENTLIGHTCOLOR );
 			console.log(ambientLight);
-		        scene.add( ambientLight );
-		        
-		        var directionalLight = new THREE.DirectionalLight( DIRECTIONALLIGHTCOLOR1 );
-		        directionalLight.position.x = 0.7633887690326467;
-		        directionalLight.position.y = -0.15978852522357995;
-		        directionalLight.position.z = -0.6258635750079197;
-		        directionalLight.position.normalize();
-		        console.log(directionalLight);
-		        scene.add( directionalLight );
+			scene.add( ambientLight );
+				
+			var directionalLight = new THREE.DirectionalLight( DIRECTIONALLIGHTCOLOR1 );
+			directionalLight.position.x = 0.7633887690326467;
+			directionalLight.position.y = -0.15978852522357995;
+			directionalLight.position.z = -0.6258635750079197;
+			directionalLight.position.normalize();
+			console.log(directionalLight);
+			scene.add( directionalLight );
 
-		        var directionalLight = new THREE.DirectionalLight(DIRECTIONALLIGHTCOLOR2);
-		        directionalLight.position.x = 0.6072938565785142;
-		        directionalLight.position.y = 0.6174954195212043;
-		        directionalLight.position.z = -0.4998935673044085;
-		        directionalLight.position.normalize();
-		        console.log(directionalLight);
-		        scene.add( directionalLight );
-
+			var directionalLight = new THREE.DirectionalLight(DIRECTIONALLIGHTCOLOR2);
+			directionalLight.position.x = 0.6072938565785142;
+			directionalLight.position.y = 0.6174954195212043;
+			directionalLight.position.z = -0.4998935673044085;
+			directionalLight.position.normalize();
+			console.log(directionalLight);
+			scene.add( directionalLight );
 
 			renderer = new THREE.WebGLRenderer();
 			renderer.setClearColor( 0xffffff );
@@ -477,38 +423,36 @@
 
 		function shipLoader(ship, i, player){
 			var manager = new THREE.LoadingManager();
-		        manager.onProgress = function ( item, loaded, total ) {
-		        	console.log( item, loaded, total );
-		        };
-
-		        var loader = new THREE.OBJLoader( manager );
-		        
-	        	var fileName = '../static/visualize/res/obj/ship0' + (i).toString() + '.obj';
-		        	// console.log(fileName);
-		        	loader.load( fileName, function ( object ) {
-			        	object.scale.set(ship.scaleX, ship.scaleY, ship.scaleZ);
-			        	object.rotation.set(0, ship.rotation, 0);
-			        	object.position.x = getXPosition(
-			        		ship.location.x, 
-			        		ship.size, 
-			        		ship.direction, 
-			        		ship.revisionX, player);
-			        	object.position.y = 25;
-			        	object.position.z = getZPosition(
-			        		ship.location.z, 
-			        		ship.size, 
-			        		ship.direction, 
-			        		ship.revisionZ, player);
-			        	scene.add( object );
-			        });
+			manager.onProgress = function ( item, loaded, total ) {
+				console.log( item, loaded, total );
+			};
+			var loader = new THREE.OBJLoader( manager );
+				
+			var fileName = '../static/visualize/res/obj/ship0' + (i).toString() + '.obj';
+			// console.log(fileName);
+			loader.load( fileName, function ( object ) {
+				object.scale.set(ship.scaleX, ship.scaleY, ship.scaleZ);
+				object.rotation.set(0, ship.rotation, 0);
+				object.position.x = getXPosition(
+					ship.location.x, 
+					ship.size, 
+					ship.direction, 
+					ship.revisionX, player
+				);
+				object.position.y = 25;
+				object.position.z = getZPosition(
+					ship.location.z, 
+					ship.size, 
+					ship.direction, 
+					ship.revisionZ, player
+				);
+				scene.add( object );
+			});
 		}
 
 		function makeBomb(x, z, player){
-			if(player == 2)
-				mesh.position.set(x * 50 - 500 - 25, 0, z * 50 - 25);
-			else
-				mesh.position.set(x * 50 - 25, 0, z * 50 - 500 - 25);
-
+			if(player == 2) mesh.position.set(x * 50 - 500 - 25, 0, z * 50 - 25);
+			else			mesh.position.set(x * 50 - 25, 0, z * 50 - 500 - 25);
 			bombScene.add(mesh);
 			bombTime++;
 		}
@@ -519,46 +463,34 @@
 		}
 
 		function changeBoardColor(x, z, color, player){
+			var rectGeometry = new THREE.BoxGeometry( 48, 1, 48 );
+			var rectMaterialRed = new THREE.MeshBasicMaterial( {color: CORRECTSHOOTCOLOR} );
+			var rectMaterialBlack = new THREE.MeshBasicMaterial( {color: WRONGSHOOTCOLOR} );
 
-		        var rectGeometry = new THREE.BoxGeometry( 48, 1, 48 );
-		        var rectMaterialRed = new THREE.MeshBasicMaterial( {color: CORRECTSHOOTCOLOR} );
-		        var rectMaterialBlack = new THREE.MeshBasicMaterial( {color: WRONGSHOOTCOLOR} );
-			if(color == 'red')
-			        shade = new THREE.Mesh( rectGeometry, rectMaterialRed );
-			else if(color == 'black')
-				shade = new THREE.Mesh( rectGeometry, rectMaterialBlack);
+			if(color == 'red') 			shade = new THREE.Mesh( rectGeometry, rectMaterialRed );
+			else if(color == 'black') 	shade = new THREE.Mesh( rectGeometry, rectMaterialBlack);
 
-			if (player == 2)
-				shade.position.set(x*50-500-25, 0, z*50-25);
-			else
-				shade.position.set(x*50-25, 0, z*50-500-25);
+			if (player == 2)	shade.position.set(x*50-500-25, 0, z*50-25);
+			else				shade.position.set(x*50-25, 0, z*50-500-25);
 			scene.add(shade);
 		}
 
 		function getXPosition(x, size, direction, revision, player) {
 			var side;
-			if (player == 2)
-				side = -500;
-			else 
-				side = 0;
+			if (player == 2)	side = -500;
+			else 				side = 0;
 
-			if(direction == 'y')
-				return (x+1) * 50 - 25 + side + revision;
-			else
-				return   (x + 1 + size/2) * 50 + side + revision;
+			if(direction == 'y')	return (x+1) * 50 - 25 + side + revision;
+			else					return (x + 1 + size/2) * 50 + side + revision;
 		}
 
 		function getZPosition(z, size, direction, revision, player) {
 			var side;
-			if (player == 2)
-				side = 0;
-			else
-				side = -500;
+			if (player == 2) side = 0;
+			else			 side = -500;
 
-			if(direction == 'x')
-				return (z + 1) * 50 + 25 + side + revision;
-			else
-				return   (z + 1 + size/2) * 50 + side + revision;
+			if(direction == 'x') return (z + 1) * 50 + 25 + side + revision;
+			else 				 return   (z + 1 + size/2) * 50 + side + revision;
 		}
 
 		function onWindowResize() {
@@ -566,9 +498,7 @@
 			camera.right = window.innerWidth / 2;
 			camera.top = window.innerHeight / 2;
 			camera.bottom = window.innerHeight / - 2;
-
 			camera.updateProjectionMatrix();
-
 			renderer.setSize( window.innerWidth, window.innerHeight );
 		}
 
@@ -582,7 +512,6 @@
 							//console.log(logs[logNum]);
 							var player = logs[logNum].player;
 							//console.log(player);
-
 							if(logs[logNum].result > 0){
 								bombX = logs[logNum].guess.x + 1;
 								bombZ = logs[logNum].guess.y + 1;
@@ -599,7 +528,6 @@
 					});
 					binded=true;
 				}
-				
 			}
 
 			if(logNum == logs.length && !completed){
@@ -607,17 +535,11 @@
 				var lastPlayer = logs[logNum-1]['player'];
 				var lastSink = logs[logNum-1]['sink'];
 				if (!lastSink) {
-					if (lastPlayer==1) {
-						show_toast("Player 2 wins!","error");
-					} else {
-						show_toast("Player 1 wins!","success");
-					}
+					if (lastPlayer==1)	show_toast("Player 2 wins!","error");
+					else 				show_toast("Player 1 wins!","success");
 				} else {
-					if (lastPlayer==1) {
-						show_toast("Player 1 wins!","success");
-					} else {
-						show_toast("Player 2 wins!","error");
-					}
+					if (lastPlayer==1) 	show_toast("Player 1 wins!","success");
+					else 				show_toast("Player 2 wins!","error");
 				}
 				completed = true;
 			}
@@ -627,27 +549,19 @@
 				makeBomb(bombX,bombZ,bombPlayer);
 				mesh.scale.set(bombTime/10, bombTime/10, bombTime/10);
 				bombMaterial.uniforms[ 'time' ].value = .00025 * ( Date.now() - start );
-			}
-			else {
-				removeBomb();
-			}
+			} else removeBomb();
+
 			requestAnimationFrame( animate );
 			render();
 		}
-
-
 		function render() {
-        		camera.lookAt( scene.position );
-        		renderer.render( boardScene, camera );
+			camera.lookAt( scene.position );
+			renderer.render( boardScene, camera );
 			renderer.clearDepth();
 			renderer.render( scene, camera );
 			renderer.clearDepth();
 			renderer.render( bombScene, camera);
-		    
 		}
 	});
-
 </script>
-
 </html>
-

@@ -1,62 +1,44 @@
 from flask import request, redirect, url_for, session, render_template
 from application import app
+from application.const import *
 from application.lib.auth import *
-from application.models.user_management import *
-from application.models.database import select_query
-from application.constants import *
-
+from application.models import user_manager, battleship_db
 
 @app.route('/join', methods = ['POST'])
-def join():
-    salt = app.config['SALT']
-    email = request.form[KEY_EMAIL]
-    schoolId = request.form[KEY_SCHOOL_ID]
-    password = request.form[KEY_PASSWORD]
-    members = []
-    for i in range(1,4):
-        if KEY_MEMBERS + str(i) in request.form:
-            members.append(request.form[KEY_MEMBERS+str(i)].encode('utf8'))
+def join() :
+    email     = request.form[Key.EMAIL]
+    school_id = request.form[Key.SCHOOL_ID]
+    password  = request.form[Key.PASSWORD]
+    members   = [request.form[key].encode('utf-8') for key in ['%s%d'%(Key.MEMBERS, i) for i in [1,2,3]] if key in request.form]
 
-    if email_duplicated(email):
-        # duplicated email
-        return '1'
-    else:
-        # insert to db
-        add_user(email,password,schoolId, members)
-        return '0'
-
-@app.route('/join_submit',methods = ['POST'])
-def join_submit():
-    return str(request.form)
+    email_duplicated = user_manager.is_email_duplicated(email)
+    if not email_duplicated : user_manager.add_user(email, password, school_id, members)
+    return ['0', '1'][email_duplicated]
 
 @app.route('/login')
-def login():
-    if is_login():
-        return redirect(url_for('index'))
+def login() :
+    if is_login() : return redirect(url_for('index'))
+    query = "SELECT * FROM school_list"
+    cursor = battleship_db.select(query)
+    return render_template('login.html', school_list = cursor)
 
-    query = "SELECT * FROM schoolList"
-    res = select_query(query)
-
-    return render_template('login.html',schoolList = res)
-
-@app.route('/login_submit', methods=['POST'])
-def login_submit():
-    email = request.form[KEY_EMAIL]
-    password = request.form[KEY_PASSWORD]+app.config['SALT']
-    where = "WHERE email = '"+email+"' AND password = password('"+password+"')"
-    res = get_users(where)
-    if len(res) == 1:
-        row = res[0]
-        session[KEY_USER_ID] = row[COL_ID]
-        session[KEY_USER_LEVEL] = row[COL_USER_LEVEL]
-        session[KEY_SCHOOL_ID] = row[COL_SCHOOL_ID]
+@app.route('/login_submit', methods = ['POST'])
+def login_submit() :
+    email = request.form[Key.EMAIL]
+    password = request.form[Key.PASSWORD] + app.config['SALT']
+    where = "WHERE email = '%s' AND password = password('%s')" % (email, password)
+    cursor = user_manager.get_users(where)
+    if len(cursor) == 1 :
+        row = cursor[0]
+        session[Key.USER_ID] = row[Col.ID]
+        session[Key.USER_LEVEL] = row[Col.USER_LEVEL]
+        session[Key.SCHOOL_ID] = row[Col.SCHOOL_ID]
         return '0'
-    else:
-        #fail
+    else :
         return '1'
 
 @app.route('/logout')
-def logout():
-    session.pop(KEY_USER_ID,None)
-    session.pop(KEY_USER_LEVEL,None)
+def logout() :
+    session.pop(Key.USER_ID, None)
+    session.pop(Key.USER_LEVEL, None)
     return redirect(url_for('login'))

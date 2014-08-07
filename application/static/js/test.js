@@ -1,15 +1,8 @@
 $(document).ready(function(){
-
-
 	$(document).on('click','button#code-submit',submit_code);
-
 	$(document).on('change','input[type=radio][name=enemy-type]',function(){
-
-		if ($(this).val()=='custom'){
-			$('textarea[name=code-enemy]').removeAttr('disabled');
-		} else {
-			$('textarea[name=code-enemy]').attr('disabled','disabled');
-		}
+		if ($(this).val()=='custom') $('textarea[name=code-enemy]').removeAttr('disabled');
+		else $('textarea[name=code-enemy]').attr('disabled','disabled');
 	});
 
 	$(document).on('submit','form.container',function(){
@@ -23,8 +16,6 @@ $(document).ready(function(){
 			$("#code-enemy").focus();
 			return false;
 		}
-
-
 		run_test($(this).serialize());
 		return false;
 	});
@@ -33,7 +24,6 @@ $(document).ready(function(){
 function run_test(data){
 	show_progress();
 	$("#btn-form-submit").attr('disabled','disabled');
-
 	$.post(
 		'/run_test',
 		data,
@@ -67,40 +57,39 @@ function run_test(data){
 					$("#form-visualize").remove();
 				}
 			});
-		}).always(function(){
-			hide_progress();
-			$("#btn-form-submit").removeAttr('disabled');
+		}
+	).always(function(){
+		hide_progress();
+		$("#btn-form-submit").removeAttr('disabled');
 
-		}).fail(function(xhr, status, error){
-			show_toast('Python syntax error or other exception','error');
-			//var errorWindow = window.open("", '_blank');
-			//errorWindow.document.write(xhr.responseText);
+	}).fail(function(xhr, status, error){
+		show_toast('Python syntax error or other exception','error');
+		//var errorWindow = window.open("", '_blank');
+		//errorWindow.document.write(xhr.responseText);
+	});
+}
 
+function submit_code(){
+	show_progress();
+	$("#code-submit").attr('disabled','disabled');
 
-		});
-	}
+	if ($('textarea#code-test').val()=='') return false;
 
-	function submit_code(){
-
-		show_progress();
-		$("#code-submit").attr('disabled','disabled');
-		if ($('textarea#code-test').val()=='') return false;
-		$.post('submit_code',{
+	$.post(
+		'submit_code',
+		{
 			new:$('textarea#code-test').val()
 		},
 		function onSuccessSubmit(data) {
-			if (data == '0') {
-				show_toast('Code submitted','success');
-			} else {
-				show_toast('Failed to submit code','error');
-			}
-		}).always(function(){
-			hide_progress();
-			$("#code-submit").removeAttr('disabled');
+			if (data == '0') show_toast('Code submitted','success');
+			else show_toast('Failed to submit code','error');
+		}
+	).always(function(){
+		hide_progress();
+		$("#code-submit").removeAttr('disabled');
+	});
+}
 
-		});
-	}
-
-	function between(x, min, max) {
-		return x>=min && x<=max;
-	}
+function between(x, min, max) {
+	return x >= min && x <= max;
+}

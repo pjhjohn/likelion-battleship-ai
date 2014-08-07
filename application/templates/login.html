@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
+
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-
 {% endblock %}
+
 {% block header %}
 <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
 	<div class="container">
-		<!-- Brand and toggle get grouped for better mobile display -->
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-main">
 				<span class="sr-only">Toggle navigation</span>
@@ -17,9 +17,10 @@
 			</button>
 			<a class="navbar-brand" href="#">BATTLESHIP</a>
 		</div>
-	</div><!-- /.container-fluid -->
+	</div>
 </nav>
 {% endblock %}
+
 {% block body %}
 <div class="container">
 	<div class="row">
@@ -40,10 +41,7 @@
 								<br>
 								<input type="password" class="form-control" name="password" placeholder="PASSWORD" required>
 								<br>
-
 								<button type="submit" class="btn btn-primary btn-block">SIGN IN</button>
-
-								
 							</form>
 						</div>
 					</div>
@@ -58,50 +56,36 @@
 					</div>
 					<div id="sign-up" class="panel-collapse collapse">
 						<div class="panel-body">
-							<form action="join_submit" id="form-join" method="POST">
+							<form action="join" id="form-join" method="POST">
 								<input type="email" class="form-control" name="email" placeholder="EMAIL" autofocus required>
 								<br>
 								<input type="password" class="form-control" name="password" placeholder="PASSWORD" required>
 								<br>
 								<input type="password" class="form-control" name="password-confirm" placeholder="PASSWORD CONFIRM" required>
 								<br>
-								<select name="schoolid" class="form-control">
-									{% for school in schoolList %}	
-									<option value="{{ school['ID'] }}">{{ school['schoolName'].decode('utf8') }}</option>
-
+								<select name="school_id" class="form-control">
+									{% for school in school_list %}	
+									<option value="{{ school['ID'] }}">{{ school['school_name'].decode('utf-8') }}</option>
 									{% endfor %}
-
 								</select>
 								<br>
 								<div class="panel panel-info">
 									<div class="panel-heading">Members<span id="btn-add-member" class="glyphicon glyphicon-plus pull-right"></span></div>
 									<div class="panel-body" id="form-members">
 										<input type="text" class="form-control members" name="members1" placeholder="NAME" required>
-										
 									</div>
-
 								</div>
 								<br>
 								<button type="submit" class="btn btn-primary btn-block">SIGN UP</button>
-								
-
-								
-
 							</form>
 						</div>
 					</div>
 				</div>
 			</div>			
-
 		</div>
 	</div>
 </div>
-
-
-
-
 <script src="{{ url_for('static', filename='js/lib/jsencrypt.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lib/toast.js') }}"></script>
 <script src="{{ url_for('static', filename='js/login.js') }}"></script>
-
 {% endblock %}

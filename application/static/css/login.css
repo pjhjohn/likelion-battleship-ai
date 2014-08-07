@@ -1,31 +1,3 @@
-body {
-
-}
-
 #btn-add-member {
     cursor:pointer;
 }
-
-/*
-form#form-join {
-	display:none;
-}
-
-
-::-webkit-input-placeholder { 
-    color:    #75706b;
-}
-:-moz-placeholder { 
-    color:    #999;
-    opacity:  1;
-}
-::-moz-placeholder { 
-    color:    #75706b;
-    opacity:  1;
-}
-:-ms-input-placeholder { 
-    color:    #75706b;
-}
-
-
-*/

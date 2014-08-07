@@ -1,5 +1,5 @@
 from flask import session
-from application.constants import *
+from application.const import *
 
 def is_login():
     return Key.USER_ID in session and Key.USER_LEVEL in session and Key.SCHOOL_ID in session

@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 from application.lib.game.record import Record
 from application.lib.game.board import Board
-# import sys
-# sys.setresursionlimit(2)
+from application.lib.timeout import timeout_sec
 
 # ============= USER AI PROGRAM CODE =============

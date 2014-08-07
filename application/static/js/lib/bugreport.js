@@ -25,7 +25,7 @@ $(document).ready(function(){
     $("#btn-bug-report").click(function(){
         show_progress();
         var data = $('#form-bug-report').serialize();
-        $.post('/bugreport',data,function(response){
+        $.post('/bugreport', data, function(response){
             if (response == '0') {
                 show_toast('Submitted','success');
                 $("#form-bug-report input, #form-bug-report textarea").val('');
@@ -39,7 +39,5 @@ $(document).ready(function(){
             hide_progress();
         });
     });
-
-    $('body').append('<button style="position:fixed;right:20px;bottom:20px;z-index:9999;" type="button" class="btn btn-warning" data-toggle="modal" data-target="#modal-bug-report">Bug Report</button>');
-    
+    $('body').append('<button style="position:fixed;right:20px;bottom:20px;z-index:9999;" type="button" class="btn btn-warning" data-toggle="modal" data-target="#modal-bug-report">Bug Report</button>'); 
 });
