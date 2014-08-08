@@ -14,7 +14,7 @@ def admin(active = 'user_list') :
     if not is_admin() :
         return redirect(url_for('index'))
     # Now Logged in as ADMIN
-    where = "WHERE school_id = (SELECT school_id FROM users WHERE ID = '%s')" % ['', str(session[Key.USER_ID])][int(session[Key.USER_LEVEL]) < 3]
+    where = "WHERE school_id = (SELECT school_id FROM user WHERE ID = '%s')" % ['', str(session[Key.USER_ID])][int(session[Key.USER_LEVEL]) < 3]
     cursor = user_manager.get_users(where)
     user_list = []
     for user in cursor :
@@ -30,7 +30,7 @@ def admin(active = 'user_list') :
     for i in range(league_count) :
         league_list[i][Key.RANKING] = battle_manager.get_ranking(league_list[i][Col.ID])
 
-    return render_template('admin.html', current = request.path[1:], users = user_list, league_list = league_list, league_count = league_count, active = ['user_list', active][active])
+    return render_template('admin.html', current = request.path[1:], users = user_list, league_list = league_list, league_count = league_count, active = active if active else 'user_lst')
 
 @app.route('/get_user_list', methods = ['POST'])
 def get_user_list() :
@@ -40,7 +40,7 @@ def get_user_list() :
     if not is_admin() :
         return json.dumps([])
     else :
-        query = "SELECT * FROM users user LEFT JOIN school_list sl ON user.school_id = sl.ID" + [''," WHERE s.school_id = '%d'" % school_id][user_level==Level.SCHOOL_ADMIN]
+        query = "SELECT * FROM user usr LEFT JOIN school_list sl ON usr.school_id = sl.ID" + [''," WHERE sl.school_id = '%d'" % school_id][user_level==Level.SCHOOL_ADMIN]
         cursor = battleship_db.select(query)
         user_list = []
         for user in cursor :

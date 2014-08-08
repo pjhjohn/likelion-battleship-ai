@@ -32,26 +32,37 @@ function run_test(data){
 		if (response == '1') {
 			show_toast('You have to place ship first', 'error');
 			return false;
-		} else if(response == '2') {	// TODO
-			show_toast('Your code were Timed Out');
-			return false;
 		}
-
 		var log = $.parseJSON(response);
-		var latest_log = log['history'][log['history'].length - 1];
-		if (latest_log['player'] == 1) {
-			if (!latest_log['sink']) {
-				if (latest_log['guess']['x'] in dec_digit && latest_log['guess']['y'] in dec_digit) show_toast("You shoot same point twice","error");
-				else show_toast("You shoot out of board","error")
-			} else show_toast('You win','success');
-		} else show_toast('You lose','warning');
-		show_confirm('Do you want to visualize this battle?','default',function(check){
-			if (check) {
-				$('body').append('<form id="form-visualize" action="/visualize" method="post" target="_blank"><textarea name="log" id="" cols="30" rows="10">'+response+'</textarea></form>');
-				$("#form-visualize").submit();
-				$("#form-visualize").remove();
-			}
-		});
+		if (log['my_error'] != 0) {
+			show_toast('ERROR WITH PLAYER1\n' + log['my_error_msg']);
+			return false;
+		} else if(log['enemy_error'] != 0) {
+			show_toast('ERROR WITH PLAYER2\n' + log['enemy_error_msg']);
+			return false;
+		} else if(log['game_error'] != 0) {
+			show_toast('ERROR DURING GAME\n' + log['game_error_msg']);
+			return false;
+		} else {
+			latest_log = log['game_log']['history'][log['game_log']['history'].length - 1];
+			if (latest_log['player'] == 1) {
+				if (!latest_log['sink']) {
+					if (latest_log['guess']['x'] in dec_digit && latest_log['guess']['y'] in dec_digit) show_toast("You shoot same point twice","error");
+					else show_toast("You shoot out of board","error")
+				} else show_toast('You win','success');
+			} else show_toast('You lose','warning');
+
+			show_confirm('Do you want to visualize this battle?','default',function(check){
+				if (check) {
+					console.log(log['game_log'])
+					$('body').append('<form id="form-visualize" action="/visualize" method="post" target="_blank"><textarea name="log" id="" cols="30" rows="10">'
+						+ JSON.stringify(log['game_log'])
+						+ '</textarea></form>');
+					$("#form-visualize").submit();
+					$("#form-visualize").remove();
+				}
+			});
+		}
 	}).always(function(){
 		hide_progress();
 		$("#btn-form-submit").removeAttr('disabled');

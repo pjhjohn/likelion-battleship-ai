@@ -58,6 +58,6 @@ def static_analysis(pystr) :
 	# return code
 	begin, end = match.start(0), match.end(0)
 	indent = '\t' if pystr[end:end+1]=='\t' else '    '
-	code = pystr[:begin] + '@timeout_sec(3)\n' + pystr[begin:end] + indent + 'global THREAD_ACTIVE\n' + pystr[end:]
+	code = pystr[:begin] + '@timeout_sec(2)\n' + pystr[begin:end] + indent + 'global THREAD_ACTIVE\n' + pystr[end:]
 	code = re.sub(r'while', 'while THREAD_ACTIVE and', code)
 	return {'code' : code, 'errorcode' : ErrorCode.NotError }

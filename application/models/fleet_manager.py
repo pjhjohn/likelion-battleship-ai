@@ -10,4 +10,9 @@ def get_fleets(user_id, is_latest = False):
     return battleship_db.select(query)
 
 def get_latest_fleet(user_id):
-    return json.loads(get_fleets(user_id, True)[0][Col.DEPLOYMENT])
+	fleets = get_fleets(user_id, True)
+	if len(fleets) > 0 :
+		return json.loads(fleets[0][Col.DEPLOYMENT])
+	else : 
+		raise ValueError('AT LEAST ONE FLEET DEPLOYMENT IS NEEDED')
+	# AT LEAST ONE FLEET DEPLOYMENT IS NEEDED

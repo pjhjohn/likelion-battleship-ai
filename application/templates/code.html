@@ -30,7 +30,7 @@
 						{% endif %}
 						{% autoescape false %}
 							{% if files[i]['errorcode'] != 0 %}
-								<span class="label label-danger pull-right">ERROR : {{ errormsg[files[i]['errorcode']] }}</span>
+								<span class="label label-danger pull-right">{{ errormsg[files[i]['errorcode']] }}</span>
 							{% endif %}
 						{% endautoescape %}
 					</a>

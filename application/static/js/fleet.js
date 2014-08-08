@@ -66,13 +66,14 @@ $(document).ready(function(){
 	});
 
 	$(document).on('keydown',function onKeyDown(e){
-		if (e.which == 82/* r */) {
+		console.log(e.which);
+		if (e.which == 82 /* r */ ) {
 			is_horizontal = !is_horizontal;
 			if ( typeof current_cell !== 'undefined' ) {
 				current_cell.mouseleave();
 				current_cell.mouseenter();
 			}
-		} else if (e.which == 88/* x */) {
+		} else if (e.which == 88 /* x */ ) {
 			var fleet_code = current_cell.data('deployment_code');
 			var removedship_type = current_cell.data('ship_type');
 			//console.log(removedship_type);
@@ -92,13 +93,8 @@ $(document).ready(function(){
 			remaining_ships[removedship_type]++;
 			$('#ship'+removedship_type).removeAttr('disabled');
 			$('label[for=ship'+removedship_type+']').find('.remaining_ship_count').text(remaining_ships[removedship_type]);
-
-		} else if ( e.which == 192 || e.which == 48 ) {
-			$('#ship0').click();
-			current_cell.mouseleave();
-			current_cell.mouseenter();
-		} else if ( e.which >= 49 && e.which <= 52 ) {
-			$('#ship'+(e.which-48)).click();
+		} else if ( 48 < e.which && e.which <= 52 /* 1 ~ 4 */ ) {
+			$('#ship' + (e.which - 49)).click();
 			current_cell.mouseleave();
 			current_cell.mouseenter();
 		}

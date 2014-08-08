@@ -18,24 +18,23 @@ def join() :
 @app.route('/login')
 def login() :
     if is_login() : return redirect(url_for('index'))
-    query = "SELECT * FROM school_list"
-    cursor = battleship_db.select(query)
+    query    = "SELECT * FROM school_list"
+    cursor   = battleship_db.select(query)
     return render_template('login.html', school_list = cursor)
 
 @app.route('/login_submit', methods = ['POST'])
 def login_submit() :
-    email = request.form[Key.EMAIL]
+    email    = request.form[Key.EMAIL]
     password = request.form[Key.PASSWORD] + app.config['SALT']
-    where = "WHERE email = '%s' AND password = password('%s')" % (email, password)
-    cursor = user_manager.get_users(where)
-    if len(cursor) == 1 :
-        row = cursor[0]
-        session[Key.USER_ID]    = row[Col.ID]
-        session[Key.USER_LEVEL] = row[Col.USER_LEVEL]
-        session[Key.SCHOOL_ID]  = row[Col.SCHOOL_ID]
-        return '0'
-    else :
-        return '1'
+    where    = "WHERE email = '%s' AND password = password('%s')" % (email, password)
+    cursor   = user_manager.get_users(where)
+
+    if not len(cursor) == 1 : return '1'
+    row = cursor[0]
+    session[Key.USER_ID]    = row[Col.ID]
+    session[Key.USER_LEVEL] = row[Col.USER_LEVEL]
+    session[Key.SCHOOL_ID]  = row[Col.SCHOOL_ID]
+    return '0'
 
 @app.route('/logout')
 def logout() :

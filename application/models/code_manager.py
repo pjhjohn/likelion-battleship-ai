@@ -2,7 +2,6 @@ import os, time, imp, uuid, battleship_db, fleet_manager
 from application.const import *
 from application.lib import static_analyzer as analyzer
 from application.lib.game import dummy_ai, game
-from application.lib.timeout import TimeoutError
 
 def add_code(user_id, code) :
     base_dir = '%s/%d' % (Path.Upload.DIR, user_id)
@@ -31,18 +30,18 @@ def add_code(user_id, code) :
     # Import AI Module
     if not error_code :
         try    : test_ai_module = import_from_path('%s/%s.py'%(base_dir, Path.Upload.PREFIX + file_name))
-        except : error_code = ErrorCode.Compile
+        except : error_code = ErrorCode.CompileError
 
     # Test
     fleet_deployment = fleet_manager.get_latest_fleet(user_id)
     enemy_ai_module = dummy_ai
     if not error_code :
-        try    : game.play(fleet_deployment, fleet_deployment, test_ai_module, enemy_ai_module)
-        except TimeoutError : error_code = ErrorCode.Timeout
-        except : errorcode = ErrorCode.Runtime
+        playresult = game.play(fleet_deployment, fleet_deployment, test_ai_module, enemy_ai_module)
+        error_code = playresult['errorcode']
+        if error_code : error_msg  = playresult['result']
 
     # INSERT Code
-    query = "INSERT INTO ai_code (user_id, file_name, errorcode) VALUES " + "('%d', '%s', '%d')" % (user_id, file_name, error_code)
+    query = "INSERT INTO ai_code (user_id, file_name, errorcode, description) VALUES " + "('%d', '%s', '%d', '%s')" % (user_id, file_name, error_code, error_msg)
     return battleship_db.insert(query)
 
 def get_codes(user_id) :

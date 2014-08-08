@@ -40,15 +40,15 @@
         
         <div class="tab-pane {{ ['','active'][current == 'ranking'] }}" id="ranking">
             <div id = "btn-new-league-wrap">
-                <button type="button" class="btn btn-success pull-right" id="btn-new-league">Start new league</button>
+                <button type="button" class="btn btn-success pull-right" id="btn-new-league">Start New League</button>
             </div>
             <div class="panel-group" id="battle-list">
-                {% for i in range(leagueCount) %}
+                {% for i in range(league_count) %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4 class="panel-title">
                             <a data-toggle="collapse" data-parent="#battle-list" href="#league{{i}}">
-                                {{ league_list[i]['schoolName'] }}&nbsp;({{ league_list[i]['createdTime'] }})
+                                {{ league_list[i]['schoolName'] }}&nbsp;({{ league_list[i]['created_time'] }})
                             </a>
                         </h4>
                     </div>

@@ -43,14 +43,18 @@ Path = attrdict_const(
 )
 # Error Message Corresponds to its errorcode
 ErrorCode = attrdict_const(
-	NotError	= 0,
-	TripleQuote = 1,
-	GuessNotDef = 2,
-	RecursionNA	= 3,
-	InputFuncNA	= 4,
-	Runtime 	= 5,
-	Timeout 	= 6,
-	Compile		= 7
+	NotError	 = 0,
+	TripleQuote  = 1,
+	GuessNotDef  = 2,
+	RecursionNA	 = 3,
+	InputFuncNA	 = 4,
+	RuntimeError = 5,
+	TimeoutError = 6,
+	ImportError  = 7,
+	CompileError = 8,
+	Player1LostWithError = 9,
+	Player2LostWithError = 10,
+	SyntaxError  = 11	
 )
 ErrorMsg = attrdict_const(
 	CodeSubmit = [
@@ -61,6 +65,11 @@ ErrorMsg = attrdict_const(
 		'Input Functions Not Allowed',						# 4
 		'Runtime Error',									# 5
 		'Timeout Error',									# 6
-		'Compile Error'										# 7	
+		'Import Error',										# 7	
+		'Compile Error',									# 8	
+		"Error from Your ( Player1's ) Code",				# 9
+		"Error from Player2's Code",						# 10
+		'Syntax Error',										# 11
+		'Unexpected Error'									# 12
 	]
 )
