@@ -2,7 +2,7 @@
 {% block head %}
 {{ super() }}
 
-<link rel="stylesheet" href="{{ url_for('static',filename='css/test.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/test.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -19,7 +19,7 @@
 					<h3 class="panel-title">Your Code</h3>
 				</div>
 				<div class="panel-body">
-					<textarea name="code-test" id="code-test" class="form-control" cols="30" rows="10" autofocus></textarea>
+					<textarea name="test_code" id="test_code" class="form-control" cols="30" rows="10" autofocus></textarea>
 				</div>
 				<div class="panel-footer text-right">
 					<button id="code-submit" type="button" class="btn btn-xs btn-primary">Submit Code</button>
@@ -32,17 +32,17 @@
 					<h3 class="panel-title">Enemy's Code</h3>
 				</div>
 				<div class="panel-body">
-					<textarea name="code-enemy" id="code-enemy" class="form-control" cols="30" rows="10" disabled></textarea>
+					<textarea name="enemy_code" id="enemy_code" class="form-control" cols="30" rows="10" disabled></textarea>
 				</div>
 				<div class="panel-footer">
 					<label class="radio-inline">
-						<input type="radio" name="enemy-type" value="random" checked> Random
+						<input type="radio" name="enemy_type" value="random" checked> Random
 					</label>
 					<label class="radio-inline">
-						<input type="radio" name="enemy-type" value="test"> Same code
+						<input type="radio" name="enemy_type" value="test"> Same code
 					</label>
 					<label class="radio-inline">
-						<input type="radio" name="enemy-type" value="custom" > Custom
+						<input type="radio" name="enemy_type" value="custom" > Custom
 					</label>
 				</div>
 			</div>

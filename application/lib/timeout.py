@@ -1,4 +1,4 @@
-import threading
+import sys, threading
 
 class TimeoutError(Exception): pass
 def timeout_sec(time_in_sec) :

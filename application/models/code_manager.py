@@ -2,49 +2,47 @@ import os, time, imp, uuid, battleship_db, fleet_manager
 from application.const import *
 from application.lib import static_analyzer as analyzer
 from application.lib.game import dummy_ai, game
+from application.lib.timeout import TimeoutError
 
 def add_code(user_id, code) :
-    base = '%s/%d' % (Path.Upload.DIR, user_id)
-    if not os.path.isdir(base) :
-        os.mkdir(base)
-
+    base_dir = '%s/%d' % (Path.Upload.DIR, user_id)
+    if not os.path.isdir(base_dir) : os.mkdir(base_dir)
     code_encoded = code.encode('utf-8')
     file_name = str(int(time.time()))
 
-    code_headerf = open(Path.CODE_HEADER_FILE_NAME)
-    code_header = code_headerf.read()
-    code_headerf.close()
+    # Load Header
+    header_file = open(Path.CODE_HEADER_FILE_NAME, 'rb')
+    header = header_file.read()
+    header_file.close()
 
-    file_for_user = open('%s/%s.py'%(base, file_name), 'w')
-    file_for_user.write(code_encoded)
-    file_for_user.close()
+    # Code for user
+    file_user = open('%s/%s.py'%(base_dir, file_name), 'wb')
+    file_user.write(code_encoded)
+    file_user.close()
 
-    error = False
+    # Code for competition
     analyzed_code, error_msg = code_encoded, ''
-# STATIC ANALYZER : analyzed code if there exist no error 
-
-    # try : 
-    #     analyzed_code = analyzer.static_analysis(code_encoded)
-    # except SyntaxError as e :
-    #     error = True
-    #     error_msg = e.args[0]
-    #     print error_msg
-
-    file_for_competition = open('%s/%s.py'%(base, Path.Upload.PREFIX + file_name), 'w')
-    file_for_competition.write(code_header + analyzed_code)
-    file_for_competition.close()
+    analyzer_result = analyzer.static_analysis(code_encoded)   
+    analyzed_code, error_code = analyzer_result['code'], analyzer_result['errorcode']
+    file_competition = open('%s/%s.py'%(base_dir, Path.Upload.PREFIX + file_name), 'wb')
+    file_competition.write(header + analyzed_code)
+    file_competition.close()
 
     # Import AI Module
-    try    : test_ai_module = import_from_file('%s/%s.py'%(base, Path.Upload.PREFIX + file_name))
-    except : error = True
+    if not error_code :
+        try    : test_ai_module = import_from_path('%s/%s.py'%(base_dir, Path.Upload.PREFIX + file_name))
+        except : error_code = ErrorCode.Compile
+
     # Test
     fleet_deployment = fleet_manager.get_latest_fleet(user_id)
     enemy_ai_module = dummy_ai
-    if not error :
+    if not error_code :
         try    : game.play(fleet_deployment, fleet_deployment, test_ai_module, enemy_ai_module)
-        except : error = True
-    # If Test Succeed
-    query = "INSERT INTO ai_code (user_id, file_name, has_error) VALUES " + "('%d', '%s', '%d')" % (user_id, file_name, [0, 1][error])
+        except TimeoutError : error_code = ErrorCode.Timeout
+        except : errorcode = ErrorCode.Runtime
+
+    # INSERT Code
+    query = "INSERT INTO ai_code (user_id, file_name, errorcode) VALUES " + "('%d', '%s', '%d')" % (user_id, file_name, error_code)
     return battleship_db.insert(query)
 
 def get_codes(user_id) :
@@ -61,7 +59,7 @@ def get_code_path(user_id) :
     return '%s/%d/' % (Path.Upload.DIR, user_id)
 
 def get_latest_code_file_name(user_id, with_header = False) :
-    query = "SELECT file_name FROM ai_code WHERE user_id = '%d' AND has_error = '0' ORDER BY uploaded_time DESC LIMIT 1" % user_id
+    query = "SELECT file_name FROM ai_code WHERE user_id = '%d' AND errorcode = '0' ORDER BY uploaded_time DESC LIMIT 1" % user_id
     cursor = battleship_db.select(query)
     if len(cursor) > 0 : return ['', Path.Upload.PREFIX][with_header] + cursor[0][Col.FILE_NAME] # return None if not
 

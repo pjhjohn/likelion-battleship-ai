@@ -9,7 +9,7 @@ def code() :
     if not is_login() :
         return redirect(url_for('login'))
     codes = code_manager.get_codes(session[Key.USER_ID])
-    return render_template('code.html', current = request.path[1:], files = codes, file_count = len(codes))
+    return render_template('code.html', current = request.path[1:], files = codes, file_count = len(codes), errormsg = ErrorMsg.CodeSubmit)
 
 @app.route('/submit_code', methods = ['POST'])
 def submit_code() :

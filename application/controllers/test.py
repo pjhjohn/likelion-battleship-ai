@@ -12,43 +12,39 @@ def test() :
 
 @app.route('/run_test', methods = ['POST'])
 def run_test() :
-    code_type_enemy = request.form[Key.TEST_ENEMY_TYPE]
-    code_for_test   = request.form[Key.TEST_CODE].encode('utf-8')
-    code_header     = code_manager.get_header_code()
-    tmp_file_name   = os.tempnam('%stest' % Path.TEMP) + '.py'
-    with open(tmp_file_name, 'w') as tmp :
-        tmp.write(code_header)
-        tmp.write(code_for_test)
+    header      = code_manager.get_header_code()
+    my_code     = request.form[Key.TEST_CODE].encode('utf-8')
 
+    # Write Temp File
+    my_filename = os.tempnam('%stest' % Path.TEMP) + '.py'
+    with open(my_filename, 'wb') as f : f.write(header + my_code)
+
+    print 'MYCODE\n' + header + my_code + '\nMYEND'
+    # Try Import
     try :
-        test_module = import_from_file(tmp_file_name)
+        my_module = code_manager.import_from_path(my_filename)
     except :
-        os.remove(tmp_file_name)
+        os.remove(my_filename)
         raise
 
-    if code_type_enemy == 'custom' :
-        tmp_file_name_2 = os.tempnam('%stest2' % Path.TEMP) + '.py'
-        enemy_code = request.form[Key.ENEMY_CODE].encode('utf-8')
-        with open(tmp_file_name_2, 'w') as tmp :
-            tmp.write(code_header)
-            tmp.write(enemy_code)
-        enemy_module = import_from_file(tmp_file_name_2)
-        os.remove(tmp_file_name_2)
-    elif code_type_enemy == 'test' :
-        enemy_module = import_from_file(tmp_file_name)
-    else :
-        enemy_module = dummy_ai
+    # Determine Enemy Code
+    enemy_type  = request.form[Key.ENEMY_TYPE]
+    if enemy_type == 'custom' :
+        enemy_code     = request.form[Key.ENEMY_CODE].encode('utf-8')
+        enemy_filename = os.tempnam('%stest2' % Path.TEMP) + '.py'
+        with open(enemy_filename, 'wb') as f : f.write(header + enemy_code)
+        print 'ENEMYCODE\n' + header + my_code + '\nENEMYEND'
+        enemy_module = code_manager.import_from_path(enemy_filename)
+        os.remove(enemy_filename)
+    elif enemy_type == 'test' : enemy_module = code_manager.import_from_path(my_filename)
+    else :                      enemy_module = dummy_ai
 
-    os.remove(tmp_file_name)
-    return test_battle(test_module, enemy_module)
+    os.remove(my_filename)
+    return test_battle(my_module, enemy_module)
 
-def test_battle(test_module, enemy_module) :
+def test_battle(my_module, enemy_module) :
     fleet = fleet_manager.get_latest_fleet(session[Key.USER_ID])
-    if not fleet :
-        return '1'
+    if not fleet : return '1'   # No Fleet
     else :
-        # TODO
-        try :
-            result = game.play(fleet, fleet, test_module, enemy_module).get_log()
-        except :
-            return '1'
+        try :    result = game.play(fleet, fleet, my_module, enemy_module).get_log()
+        except : return '2'     # Timeout

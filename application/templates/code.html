@@ -29,7 +29,9 @@
 							&nbsp;(Latest code)
 						{% endif %}
 						{% autoescape false %}
-							{{ ['','<span class="label label-danger pull-right">error</span>'][files[i]['has_error'] == 1] }}
+							{% if files[i]['errorcode'] != 0 %}
+								<span class="label label-danger pull-right">ERROR : {{ errormsg[files[i]['errorcode']] }}</span>
+							{% endif %}
 						{% endautoescape %}
 					</a>
 				</h4>

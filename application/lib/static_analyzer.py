@@ -1,3 +1,4 @@
+from application.const import *
 import re
 
 # Does static-analysis for written ai-code and return code & status
@@ -34,34 +35,29 @@ def remove_comments_from(pystr) :
 	else :
 		raise SyntaxError('EOF while scanning triple-quoted string literal')
 
-# RAISE SyntaxError OR return code
+# {'code' : modified_code(pystr), 'errorcode' : error_code}
 def static_analysis(pystr) :
 	# Try removing comments
-	try :
-		pystr = remove_comments_from(pystr)
-	except SyntaxError :
-		raise
-	match = re.search('def[ \t]+guess[ \t]*\([ \t]*record[ \t]*\)[ \t]*:.*\n', pystr)
+	try : 				 pystr = remove_comments_from(pystr)
+	except SyntaxError : return {'code' : '', 'errorcode' : ErrorCode.TripleQuote }
+	
 	# Detect [def guess(record) :]
+	match = re.search('def[ \t]+guess[ \t]*\([ \t]*record[ \t]*\)[ \t]*:.*\n', pystr)
 	if not bool(match) :
-		raise SyntaxError('Function Not Defined : guess')
+		return {'code' : '', 'errorcode' : ErrorCode.GuessNotDef }
+		
 	# Detect Recursion on guess
 	if bool(re.search('guess[ \t]*\(.*\)', pystr[match.end(0):])) :
-		raise SyntaxError('Recursion Not Allowed : guess')
+		return {'code' : '', 'errorcode' : ErrorCode.RecursionNA }
+
 	# Detect Unexpected function call <- input
 	unexpected_functions = ['input', 'raw_input']
 	if bool(re.search('('+'|'.join(unexpected_functions)+')[ \t]*\(.*\)', pystr)) :
-		raise SyntaxError('Input Functions Not Allowed')
+		return {'code' : '', 'errorcode' : ErrorCode.InputFuncNA }
+
 	# return code
 	begin, end = match.start(0), match.end(0)
 	indent = '\t' if pystr[end:end+1]=='\t' else '    '
 	code = pystr[:begin] + '@timeout_sec(3)\n' + pystr[begin:end] + indent + 'global THREAD_ACTIVE\n' + pystr[end:]
 	code = re.sub(r'while', 'while THREAD_ACTIVE and', code)
-	return code
-
-if __name__ == '__main__' :
-	with file('ai_1.py','r') as code :
-		result = static_analysis(code.read())
-		print '======================================='
-		print result
-		print '======================================='
+	return {'code' : code, 'errorcode' : ErrorCode.NotError }

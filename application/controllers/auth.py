@@ -30,15 +30,16 @@ def login_submit() :
     cursor = user_manager.get_users(where)
     if len(cursor) == 1 :
         row = cursor[0]
-        session[Key.USER_ID] = row[Col.ID]
+        session[Key.USER_ID]    = row[Col.ID]
         session[Key.USER_LEVEL] = row[Col.USER_LEVEL]
-        session[Key.SCHOOL_ID] = row[Col.SCHOOL_ID]
+        session[Key.SCHOOL_ID]  = row[Col.SCHOOL_ID]
         return '0'
     else :
         return '1'
 
 @app.route('/logout')
 def logout() :
-    session.pop(Key.USER_ID, None)
+    session.pop(Key.USER_ID   , None)
     session.pop(Key.USER_LEVEL, None)
+    session.pop(Key.SCHOOL_ID , None)
     return redirect(url_for('login'))
