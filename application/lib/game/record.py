@@ -11,7 +11,7 @@ class Record :
     def __init__(self, board) :
         self.board = board
         self.history = []
-        self.data = None
+        self.data = {}
 
     def get_latest(self) :
         """
@@ -21,14 +21,9 @@ class Record :
             return dict(self.history[len(self.history) - 1])
         else :
             return {}
+
     def get_history(self) : 
-        return self.history
-
-    def get_data(self) : 
-        return self.data
-
-    def set_data(self, data_in) :
-        self.data = data_in
+        return list(self.history)
 
     def get_history_at(self, index, direction='FORWARD') :
         if 0 <= index < len(self.history) :
