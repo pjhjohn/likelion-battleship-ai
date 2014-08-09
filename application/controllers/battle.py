@@ -25,6 +25,8 @@ def visualize(battle_id) :
     if request.method == 'POST' :
         game_log = request.form['log']
     else :
+        if not is_admin():
+            return 'Forbidden',403
         log_file = open('%s/%d.json' % (Path.LOGS, int(battle_id)))
         game_log = log_file.read()
         log_file.close()

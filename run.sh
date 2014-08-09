@@ -1,1 +1,1 @@
-gunicorn -w 2 -b 0:8001 run:app &
+gunicorn -w 2 -b 0:8000 run:app &
