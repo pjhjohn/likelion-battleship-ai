@@ -66,7 +66,7 @@ def play(fleet1, fleet2, player_module1, player_module2):
             try                   : 
                 guess1['x'], guess1['y'] = player_module1.guess(record1)
                 guess1['x'], guess1['y'] = int(guess1['x']), int(guess1['y'])
-            except Exception as e : raise Player1LostWithError(e.__class__.__name__)
+            except Exception as e : raise Player1LostWithError(log)
             last_record = board1.hit(1, guess1)
             log.history.append(last_record)
             record1.update_board(board1.convert())
@@ -91,7 +91,7 @@ def play(fleet1, fleet2, player_module1, player_module2):
             print 'Turn %d for player 2' % turn2
             guess2 = {}
             try                   : guess2['x'], guess2['y'] = player_module2.guess(record2)
-            except Exception as e : raise Player2LostWithError(e.__class__.__name__)
+            except Exception as e : raise Player2LostWithError(log)
             last_record = board2.hit(2, guess2)
             log.history.append(last_record)
             record2.update_board(board2.convert())

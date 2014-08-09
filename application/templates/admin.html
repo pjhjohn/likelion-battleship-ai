@@ -9,13 +9,13 @@
 <div class="container">
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
-        <li class="{{ ['','active'][current == 'user_list'] }}"><a href="#user-list" role="tab" data-toggle="tab">Team List</a></li>
-        <li class="{{ ['','active'][current == 'ranking'] }}"><a href="#ranking" role="tab" data-toggle="tab">Ranking</a></li>
+        <li class="{{ ['','active'][active == 'user_list'] }}"><a href="#user-list" role="tab" data-toggle="tab">Team List</a></li>
+        <li class="{{ ['','active'][active == 'ranking'] }}"><a href="#ranking" role="tab" data-toggle="tab">Ranking</a></li>
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
-        <div class="tab-pane {{ ['','active'][current == 'user_list'] }}" id="user-list">
+        <div class="tab-pane {{ ['','active'][active == 'user_list'] }}" id="user-list">
             <table class="table text-center">
                 <colgroup>
                     <col style="width:50%">
@@ -38,7 +38,7 @@
             </table>
         </div>
         
-        <div class="tab-pane {{ ['','active'][current == 'ranking'] }}" id="ranking">
+        <div class="tab-pane {{ ['','active'][active == 'ranking'] }}" id="ranking">
             <div id = "btn-new-league-wrap">
                 <button type="button" class="btn btn-success pull-right" id="btn-new-league">Start New League</button>
             </div>
@@ -48,7 +48,7 @@
                     <div class="panel-heading">
                         <h4 class="panel-title">
                             <a data-toggle="collapse" data-parent="#battle-list" href="#league{{i}}">
-                                {{ league_list[i]['schoolName'] }}&nbsp;({{ league_list[i]['created_time'] }})
+                                {{ league_list[i]['school_name'] }}&nbsp;({{ league_list[i]['created_time'] }})
                             </a>
                         </h4>
                     </div>
@@ -56,7 +56,7 @@
                         <div class="panel-body">
                             <div class="list-group" data-league-id="{{ league_list[i]['ID'] }}">
                                 {% for rank in league_list[i]['ranking'] %}
-                                <a class="btn-show-battle-results list-group-item" href="#" data-winner-id="{{rank['winner_id']}}">{{ rank['team_members'].decode('utf-8') }}
+                                <a class="btn-show-battle-results list-group-item" href="#" data-winner-id="{{rank['winner_id']}}">{{ rank['members'].decode('utf-8') }}
                                     <span class="pull-right label label-success">
                                         {{ rank['win_count'] }} Wins</span></a>
                                         {% endfor %}

@@ -9,9 +9,9 @@ def get_school_id(league_id) :
 def insert_result(league_id, player1_id, player2_id, game_log) : 
     winner_id = game_log['history'][-1][Key.PLAYER]
     if not game_log['history'][-1][Key.SINK] : 
-        winner_id = [player2_id, player1_id][winner == 2]
+        winner_id = [player2_id, player1_id][winner_id == 2]
     else :
-        winner_id = [player2_id, player1_id][winner == 1]
+        winner_id = [player2_id, player1_id][winner_id == 1]
     query = "INSERT INTO battle_result (league_id, player1_id, player2_id, winner_id) VALUES " + "('%d', '%d', '%d', '%d')" % (league_id, player1_id, player2_id, winner_id)
     cursor = battleship_db.insert(query)
     battle_result_id = cursor.connection.insert_id()
@@ -19,7 +19,7 @@ def insert_result(league_id, player1_id, player2_id, game_log) :
         json.dump(game_log, log_file)
 
 def get_battle_list(league_id, winner_id):
-    query = "SELECT * FROM battle_result b_result LEFT JOIN (SELECT user_id, GROUP_CONCAT(member_name) member1 FROM team_member GROUP BY user_id) player1 ON b_result.player1_id = player1.user_id LEFT JOIN (SELECT user_id, GROUP_CONCAT(member_name) member2 FROM team_member) GROUP BY user_id) player2 ON b_result.player2_id = player2.user_id WHERE b_result.league_id = '%d' AND (b_result.player1_id = '%d' OR b_result.player2_id = '%d')" % (league_id, winner_id, winner_id)
+    query = "SELECT * FROM battle_result b_result LEFT JOIN (SELECT user_id, GROUP_CONCAT(member_name) member1 FROM team_member GROUP BY user_id) player1 ON b_result.player1_id = player1.user_id LEFT JOIN (SELECT user_id, GROUP_CONCAT(member_name) member2 FROM team_member GROUP BY user_id) player2 ON b_result.player2_id = player2.user_id WHERE b_result.league_id = '%d' AND (b_result.player1_id = '%d' OR b_result.player2_id = '%d')" % (league_id, winner_id, winner_id)
     return battleship_db.select(query)
 
 def get_league_list(school_id) : 

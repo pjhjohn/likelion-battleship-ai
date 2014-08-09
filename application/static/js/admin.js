@@ -3,7 +3,7 @@ $(document).ready(function(){
 		new_league();
 	});
 	$(document).on('click','.btn-show-battle-results',function(){
-		show_battle_list($(this).parent().data('league_id'), $(this).data('winner_id'), $(this).text().split(" ")[0]);
+		show_battle_list($(this).parent().data('leagueId'), $(this).data('winnerId'), $(this).text().split(" ")[0]);
 		return false;
 	});
 });
@@ -36,7 +36,7 @@ function show_battle_list(league_id, winner_id, winner_members) {
 			$("#battle-result-list .modal-title").text(winner_members);
 			var tbody = $("#battle-result-list .modal-body table tbody").empty();
 			for ( var i in json_data ) {
-				tbody.append('<tr><td>'+json_data[i]['team_members1']+'</td><td>'+json_data[i]['team_members2']+'</td><td><span class="label '+(json_data[i]['winner_id'] == winner_id? 'label-success' : 'label-warning')+'">'+(json_data[i]['winner_id'] == winner_id? 'Win' : 'Lose')+'</span></td><td><a href="/visualize/'+json_data[i]['ID']+'" target="_blank" class="btn btn-info btn-xs">Visualize</a></td></tr>');
+				tbody.append('<tr><td>'+json_data[i]['member1']+'</td><td>'+json_data[i]['member2']+'</td><td><span class="label '+(json_data[i]['winner_id'] == winner_id? 'label-success' : 'label-warning')+'">'+(json_data[i]['winner_id'] == winner_id? 'Win' : 'Lose')+'</span></td><td><a href="/visualize/'+json_data[i]['ID']+'" target="_blank" class="btn btn-info btn-xs">Visualize</a></td></tr>');
 			}
 			$("#battle-result-list").modal('show');
 		}
