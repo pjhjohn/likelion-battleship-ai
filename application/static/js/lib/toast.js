@@ -34,7 +34,7 @@ function show_toast(message, level, style){
 		.css(style)
 		.parent()
 		.fadeIn(300)
-		.delay(2000)
+		.delay(2500)
 		.fadeOut(300,function(){
 			$('div#toast').remove();
 		});	

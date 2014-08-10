@@ -84,7 +84,7 @@ def play(fleet1, fleet2, player_module1, player_module2):
         # Player2 Turn
         while hit2 > 0 :
             turn2 += 1
-            print 'Turn %d for player 2' % turn2
+            #print 'Turn %d for player 2' % turn2
             guess2 = {}
             try                   : guess2['x'], guess2['y'] = player_module2.guess(record2)
             except Exception as e : raise Player2LostWithError({'log' : log, 'type' : e.__class__.__name__, 'description' : e.message})

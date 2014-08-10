@@ -14,5 +14,6 @@ def get_latest_fleet(user_id):
 	if len(fleets) > 0 :
 		return json.loads(fleets[0][Col.DEPLOYMENT])
 	else : 
-		raise ValueError('AT LEAST ONE FLEET DEPLOYMENT IS NEEDED')
+		return None
+		#raise ValueError('AT LEAST ONE FLEET DEPLOYMENT IS NEEDED')
 	# AT LEAST ONE FLEET DEPLOYMENT IS NEEDED
