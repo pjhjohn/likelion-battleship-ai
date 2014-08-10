@@ -58,23 +58,31 @@ def run_test() :
     os.remove(my_filename)
     # ENEMY CODE AT LEAST RUNNABLE
 
-    fleet = fleet_manager.get_latest_fleet(session[Key.USER_ID])
-    if not fleet : return '1'
-    else : 
-        playresult = game.play(fleet, fleet, my_module, enemy_module)
-        if not playresult['errorcode'] :
-            return json.dumps({
-                'my_error' : 0,
-                'enemy_error' : 0,
-                'game_error' : 0,
-                'game_error_msg' : ErrorMsg.CodeSubmit[playresult['errorcode']],
-                'game_log' : playresult['result'].get_log(False)
-            })
-        else :
-            return json.dumps({
-                'my_error' : 0,
-                'enemy_error' : 0,
-                'game_error' : playresult['errorcode'],
-                'game_error_msg' : ErrorMsg.CodeSubmit[playresult['errorcode']],
-                'game_log' : playresult['result']
-            })
+    try : fleet = fleet_manager.get_latest_fleet(session[Key.USER_ID])
+    except ValueError as e : 
+        return json.dumps({
+            'my_error'      : 0,
+            'enemy_error'   : 0,
+            'game_error'    : 100,
+            'game_error_msg': e.message,
+            'game_log'      : None
+        })
+    # AT LEAST, WE GOT OUR OWN FLEET
+
+    playresult = game.play(fleet, fleet, my_module, enemy_module)
+    if not playresult['errorcode'] :
+        return json.dumps({
+            'my_error'      : 0,
+            'enemy_error'   : 0,
+            'game_error'    : 0,
+            'game_error_msg': playresult['errormsg'], #ErrorMsg.CodeSubmit[playresult['errorcode']],
+            'game_log'      : playresult['result'].get_log(False)
+        })
+    else :
+        return json.dumps({
+            'my_error'      : 0,
+            'enemy_error'   : 0,
+            'game_error'    : playresult['errorcode'],
+            'game_error_msg': playresult['errormsg'], #ErrorMsg.CodeSubmit[playresult['errorcode']],
+            'game_log'      : playresult['result'].get_log(False)
+        })

@@ -43,11 +43,11 @@ def static_analysis(pystr) :
 	
 	# Detect [def guess(record) :]
 	match = re.search('def[ \t]+guess[ \t]*\([ \t]*record[ \t]*\)[ \t]*:.*\n', pystr)
-	if not bool(match) :
+	if not bool(match) : 
 		return {'code' : '', 'errorcode' : ErrorCode.GuessNotDef }
 		
 	# Detect Recursion on guess
-	if bool(re.search('guess[ \t]*\(.*\)', pystr[match.end(0):])) :
+	if bool(re.search('[ \t]+guess[ \t]*\(.*\)', pystr[match.end(0):])) :
 		return {'code' : '', 'errorcode' : ErrorCode.RecursionNA }
 
 	# Detect Unexpected function call <- input
@@ -56,8 +56,9 @@ def static_analysis(pystr) :
 		return {'code' : '', 'errorcode' : ErrorCode.InputFuncNA }
 
 	# return code
-	begin, end = match.start(0), match.end(0)
-	indent = '\t' if pystr[end:end+1]=='\t' else '    '
-	code = pystr[:begin] + '@timeout_sec(2)\n' + pystr[begin:end] + indent + 'global THREAD_ACTIVE\n' + pystr[end:]
-	code = re.sub(r'while', 'while THREAD_ACTIVE and', code)
+	begin, end, = match.start(0), match.end(0)
+	code = pystr[:begin] + '@timeout_sec(4)\n' + pystr[begin:]#end] + '    global THREAD_ACTIVE\n' + pystr[end:]
+	# code = re.sub(r'while', 'while THREAD_ACTIVE and', code)
+
+	# return code
 	return {'code' : code, 'errorcode' : ErrorCode.NotError }

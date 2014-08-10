@@ -6,7 +6,7 @@ var color = {
 };
 
 function show_confirm(message, level, callback, autohide,  tag_id){
-    autohide= autohide||true;
+    autohide= autohide||false 
     level   =    level||'default';
     tag_id  =   tag_id||'confirm';
     if($('#'+tag_id).length > 0) return false;
@@ -25,5 +25,5 @@ function show_confirm(message, level, callback, autohide,  tag_id){
         });
     });
     $("#"+tag_id).fadeIn(300);
-    if(autohide) setTimeout('$("#'+tag_id+'").fadeOut(300,function(){$("#'+tag_id+'").remove(); });',3000);
+    if(autohide) setTimeout('$("#'+tag_id+'").fadeOut(300,function(){$("#'+tag_id+'").remove(); });', 3000);
 }

@@ -1,11 +1,5 @@
 from application.lib.attrdict import attrdict_const
 class Record : 
-    """
-    <Keys in History element>
-    'guess' : (dict) x, y coordinate as {"x": (int), "y": (int)}
-    'result': (int)  guess result from -2 to 3
-    'sink'  : (int)  Sank ship.id
-    """
     # API STARTS
     Status = attrdict_const(INVALID=-2, TWICE=-1, MISSED=0, HIT=1, SINK=2, WIN=3)
     def __init__(self, board) :
@@ -14,15 +8,13 @@ class Record :
         self.data = {}
 
     def get_latest(self) :
-        """
-        (dict) return the latst result
-        """
         if len(self.history) > 0 :
             return dict(self.history[len(self.history) - 1])
         else :
             return {}
 
     def get_history(self) : 
+        print list(self.history)
         return list(self.history)
 
     def get_history_at(self, index, direction='FORWARD') :

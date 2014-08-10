@@ -8,26 +8,17 @@ def timeout_sec(time_in_sec) :
 				def __init__(self) :
 					threading.Thread.__init__(self)
 					self.result = None
-					self.error = None
-					global THREAD_ACTIVE
-					THREAD_ACTIVE = False
-
+					self.error  = None
 				def run(self) :
-					try :
-						global THREAD_ACTIVE
-						THREAD_ACTIVE = True
-						self.result = func(*args, **kwargs)
-					except :
-						self.error = sys.exc_info()[0]
+					try    : self.result = func(*args, **kwargs)
+					except : self.error = sys.exc_info()[0:2]
 			timer = Timer()
 			timer.start()
 			timer.join(time_in_sec)
 			if timer.isAlive() :
-				global THREAD_ACTIVE
-				THREAD_ACTIVE = False
-				raise TimeoutError
+				raise TimeoutError(func.__name__)
 			if timer.error :
-				raise timer.error
+				raise timer.error[0](timer.error[1])
 			return timer.result
 		return core
 	return wrapper

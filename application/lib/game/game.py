@@ -9,16 +9,16 @@ from application.const import *
 class Player1LostWithError(Exception): pass
 class Player2LostWithError(Exception): pass
 class MakersError(Exception) : pass
-def with_errormsg(func) :
-    def with_args(*args, **kwargs) :
-        try :
-            return {'errorcode' : 0, 'result' : func(*args, **kwargs)}
+# return : {'result' : game_log, 'errorcode' : error_code, 'errormsg' : error_type }
+def handle_exception(func) :
+    def func_args(*args, **kwargs) :
+        try : return { 'result' : func(*args, **kwargs), 'errorcode' : 0, 'errormsg' : ''}
         except Exception as e :
-            name = e.__class__.__name__
-            if name in ErrorCode : code = ErrorCode[name]
-            else                 : code = len(ErrorCode)
-            return {'errorcode' : code , 'result' : e.message }
-    return with_args
+            name = e.__class__.__name__                     # Exception Type
+            if name in ErrorCode : code = ErrorCode[name]   #
+            else                 : code = len(ErrorCode)    # Exception Type to 'OTHERS'
+            return {'result' : e.message['log'] , 'errorcode' : code , 'errormsg' : '%s[%s] : %s' % (name, e.message['type'], e.message['description']) }
+    return func_args
 # With decorator above, game.play returns { 'errorcode' : errorcode, 'result' : return-value OR e.message }
 
 def build_fleet(ships):
@@ -43,7 +43,7 @@ def build_fleet(ships):
         fleet.append(Ship(ship['size'], dict(ship['location']), ship['direction'], ship_id))
     return fleet
 
-@with_errormsg
+@handle_exception
 def play(fleet1, fleet2, player_module1, player_module2):
     # INIT Player 1 & 2
     fleet1.sort(key = operator.itemgetter('size'))
@@ -61,22 +61,18 @@ def play(fleet1, fleet2, player_module1, player_module2):
         # Player1 Turn
         while hit1 > 0 :
             turn1 += 1
-            print 'Turn %d for player 1' % turn1
             guess1 = {}
             try                   : 
                 guess1['x'], guess1['y'] = player_module1.guess(record1)
                 guess1['x'], guess1['y'] = int(guess1['x']), int(guess1['y'])
-            except Exception as e : raise Player1LostWithError(log)
+            except Exception as e : raise Player1LostWithError({'log' : log, 'type' : e.__class__.__name__, 'description' : e.message})
             last_record = board1.hit(1, guess1)
             log.history.append(last_record)
             record1.update_board(board1.convert())
-            print last_record
-            board1.show()
+#            board1.show()
             record1.history.append({'guess':last_record['guess'], 'result':last_record['result'], 'sink':last_record['sink']})
             hit1 = last_record['result']
-            if hit1 == 3:
-                break
-            print
+            if hit1 == 3: break
 
         if hit1 == 3 :
             print "Player 1 Won!"
@@ -91,17 +87,14 @@ def play(fleet1, fleet2, player_module1, player_module2):
             print 'Turn %d for player 2' % turn2
             guess2 = {}
             try                   : guess2['x'], guess2['y'] = player_module2.guess(record2)
-            except Exception as e : raise Player2LostWithError(log)
+            except Exception as e : raise Player2LostWithError({'log' : log, 'type' : e.__class__.__name__, 'description' : e.message})
             last_record = board2.hit(2, guess2)
             log.history.append(last_record)
             record2.update_board(board2.convert())
-            print last_record
-            board2.show()
+#            board2.show()
             record2.history.append({'guess':last_record['guess'], 'result':last_record['result'], 'sink':last_record['sink']})
             hit2 = last_record['result']
-            if hit2 == 3:
-                break
-            print
+            if hit2 == 3 : break
 
         if hit2 == 3 :
             print "Player 2 Won!"
