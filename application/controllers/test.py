@@ -76,7 +76,8 @@ def run_test() :
             'enemy_error'   : 0,
             'game_error'    : 0,
             'game_error_msg': playresult['errormsg'], #ErrorMsg.CodeSubmit[playresult['errorcode']],
-            'game_log'      : playresult['result'].get_log(False)
+            'game_log'      : playresult['result'].get_log(False),
+            'description'   : playresult['description']
         })
     else :
         return json.dumps({
@@ -84,5 +85,6 @@ def run_test() :
             'enemy_error'   : 0,
             'game_error'    : playresult['errorcode'],
             'game_error_msg': playresult['errormsg'], #ErrorMsg.CodeSubmit[playresult['errorcode']],
-            'game_log'      : playresult['result'].get_log(False)
+            'game_log'      : playresult['result'].get_log(False),
+            'description'   : playresult['description']
         })

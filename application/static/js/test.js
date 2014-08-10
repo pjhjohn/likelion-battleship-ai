@@ -35,7 +35,10 @@ function run_test(data){
 		var response = $.parseJSON(_response_);
 		if(response[   'my_error'] != 0) return with_toast('ERROR WITH PLAYER1 : ' + response[  'my_error_msg'],'error');
 		if(response['enemy_error'] != 0) return with_toast('ERROR WITH PLAYER2 : ' + response['enemy_error_msg'], 'error');
-		if(response[ 'game_error'] != 0) return with_toast(response['game_error_msg'],'error');
+		$('#console').val(response['description']);
+		if(response[ 'game_error'] != 0) {
+			return with_toast(response['game_error_msg'],'error');
+		}
 		// response['my_error'] == response['enemy_error'] == response['game_error'] = 0(False)
 		console.log(response)
 		game_history = response['game_log']['history'];

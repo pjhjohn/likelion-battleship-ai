@@ -1,10 +1,11 @@
-import operator
+import operator, traceback, sys
 from record import Record
 from board import Board
 from ship import Ship
 from log import Log
 from application.lib.timeout import TimeoutError
 from application.const import *
+from cStringIO import StringIO
 
 class Player1LostWithError(Exception): pass
 class Player2LostWithError(Exception): pass
@@ -12,12 +13,30 @@ class MakersError(Exception) : pass
 # return : {'result' : game_log, 'errorcode' : error_code, 'errormsg' : error_type }
 def handle_exception(func) :
     def func_args(*args, **kwargs) :
-        try : return { 'result' : func(*args, **kwargs), 'errorcode' : 0, 'errormsg' : ''}
-        except Exception as e :
-            name = e.__class__.__name__                     # Exception Type
-            if name in ErrorCode : code = ErrorCode[name]   #
-            else                 : code = len(ErrorCode)    # Exception Type to 'OTHERS'
-            return {'result' : e.message['log'] , 'errorcode' : code , 'errormsg' : '%s[%s] : %s' % (name, e.message['type'], e.message['description']) }
+        # Override Standard-IO
+        old_stdout = sys.stdout
+        sys.stdout = custom_stdout = StringIO()
+        try : 
+            log = func(*args, **kwargs)
+            '''Stop overriding'''
+            sys.stdout = old_stdout
+            return { 'result' : log, 'errorcode' : 0, 'errormsg' : '', 'description' : custom_stdout.getvalue() }
+        except Exception as e : 
+            '''Exception-triggered values'''
+            name = e.__class__.__name__
+            trace = traceback.format_exc()
+            if name in ErrorCode : errorcode = ErrorCode[name]
+            else                 : errorcode = len(ErrorCode)
+            '''Stop overriding'''
+            sys.stdout = old_stdout
+            console_log = custom_stdout.getvalue()
+            
+            return {    
+                'result'      : e.message['log'] ,
+                'errorcode'   : errorcode ,
+                'errormsg'    : '%s[%s] : %s' % (name, e.message['type'], e.message['description']),
+                'description' : '%s\nError %s' % (console_log, trace)
+            }
     return func_args
 # With decorator above, game.play returns { 'errorcode' : errorcode, 'result' : return-value OR e.message }
 
@@ -62,14 +81,11 @@ def play(fleet1, fleet2, player_module1, player_module2):
         while hit1 > 0 :
             turn1 += 1
             guess1 = {}
-            try                   : 
-                guess1['x'], guess1['y'] = player_module1.guess(record1)
-                guess1['x'], guess1['y'] = int(guess1['x']), int(guess1['y'])
+            try                   : guess1['x'], guess1['y'] = player_module1.guess(record1)
             except Exception as e : raise Player1LostWithError({'log' : log, 'type' : e.__class__.__name__, 'description' : e.message})
             last_record = board1.hit(1, guess1)
             log.history.append(last_record)
             record1.update_board(board1.convert())
-#            board1.show()
             record1.history.append({'guess':last_record['guess'], 'result':last_record['result'], 'sink':last_record['sink']})
             hit1 = last_record['result']
             if hit1 == 3: break
@@ -84,14 +100,12 @@ def play(fleet1, fleet2, player_module1, player_module2):
         # Player2 Turn
         while hit2 > 0 :
             turn2 += 1
-            #print 'Turn %d for player 2' % turn2
             guess2 = {}
             try                   : guess2['x'], guess2['y'] = player_module2.guess(record2)
             except Exception as e : raise Player2LostWithError({'log' : log, 'type' : e.__class__.__name__, 'description' : e.message})
             last_record = board2.hit(2, guess2)
             log.history.append(last_record)
             record2.update_board(board2.convert())
-#            board2.show()
             record2.history.append({'guess':last_record['guess'], 'result':last_record['result'], 'sink':last_record['sink']})
             hit2 = last_record['result']
             if hit2 == 3 : break

@@ -8,6 +8,15 @@ textarea.form-control {
 	box-shadow:none;
 }
 
+#console {
+	display:block;
+	width : 100%;
+	height : 200px;
+	resize:vertical;
+	border:none;
+	box-shadow:none;
+}
+
 form button[type=submit] {
 	margin-bottom:20px;
 }
