@@ -73,7 +73,7 @@ def run_test() :
     return json.dumps({
         'my_error'      : 0,
         'enemy_error'   : 0,
-        'game_error'    : 0,
+        'game_error'    : playresult['errorcode'],
         'game_error_msg': playresult['errormsg'], #ErrorMsg.CodeSubmit[playresult['errorcode']],
         'game_log'      : playresult['result'].get_log(False),
         'description'   : playresult['description']

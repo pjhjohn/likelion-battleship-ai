@@ -18,6 +18,8 @@ def remove_comments_from(pystr) :
 			if not bool(match) :
 				safe_exit = False
 				break
+			if comment_type == 'line':
+			    dieted_pystr += '\n'
 			commenting, comment_type = False, None
 			pystr = pystr[match.end(0):]
 		else :
@@ -63,7 +65,7 @@ def static_analysis(pystr) :
 
 	# return code
 	begin, end, = match.start(0), match.end(0)
-	code = pystr[:begin] + '@timeout_sec(4)\n' + pystr[begin:]#end] + '    global THREAD_ACTIVE\n' + pystr[end:]
+	code = pystr[:begin] + '@timeout_sec(10)\n' + pystr[begin:]#end] + '    global THREAD_ACTIVE\n' + pystr[end:]
 	# code = re.sub(r'while', 'while THREAD_ACTIVE and', code)
 
 	# return code

@@ -14,7 +14,7 @@ class Record :
             return {}
 
     def get_history(self) : 
-        print list(self.history)
+        #print list(self.history)
         return list(self.history)
 
     def get_history_at(self, index, direction='FORWARD') :
@@ -35,7 +35,7 @@ class Record :
         return int(self.board[x][y])
 
     def get_remaining_ships(self) : 
-        ship_ids = [1, 2, 3, 4, 5]
+        remaining = [1, 2, 3, 4, 5]
         for record in self.history :
             if record['result'] == 2 :
                 remaining.remove(result['sink'])
