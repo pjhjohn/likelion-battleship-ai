@@ -18,16 +18,18 @@ def handle_exception(func) :
         sys.stdout = custom_stdout = StringIO()
         try : 
             log = func(*args, **kwargs)
-            '''Stop overriding'''
+            # Stop overriding
             sys.stdout = old_stdout
             return { 'result' : log, 'errorcode' : 0, 'errormsg' : '', 'description' : custom_stdout.getvalue() }
         except Exception as e : 
-            '''Exception-triggered values'''
+            # Exception-triggered values
             name = e.__class__.__name__
-            trace = traceback.format_exc()
+            if 'description' in e.message : trace = e.message['traceback']
+            else                          : trace = traceback.format_exc()
+            
             if name in ErrorCode : errorcode = ErrorCode[name]
             else                 : errorcode = len(ErrorCode)
-            '''Stop overriding'''
+            # Stop overriding
             sys.stdout = old_stdout
             console_log = custom_stdout.getvalue()
             
@@ -82,7 +84,7 @@ def play(fleet1, fleet2, player_module1, player_module2):
             turn1 += 1
             guess1 = {}
             try                   : guess1['x'], guess1['y'] = player_module1.guess(record1)
-            except Exception as e : raise Player1LostWithError({'log' : log, 'type' : e.__class__.__name__, 'description' : e.message})
+            except Exception as e : raise Player1LostWithError({'log' : log, 'type' : e.__class__.__name__, 'description' : e.message['msg'], 'traceback' : e.message['traceback']})
             last_record = board1.hit(1, guess1)
             log.history.append(last_record)
             record1.update_board(board1.convert())
@@ -102,7 +104,7 @@ def play(fleet1, fleet2, player_module1, player_module2):
             turn2 += 1
             guess2 = {}
             try                   : guess2['x'], guess2['y'] = player_module2.guess(record2)
-            except Exception as e : raise Player2LostWithError({'log' : log, 'type' : e.__class__.__name__, 'description' : e.message})
+            except Exception as e : raise Player2LostWithError({'log' : log, 'type' : e.__class__.__name__, 'description' : e.message['msg'], 'traceback' : e.message['traceback']})
             last_record = board2.hit(2, guess2)
             log.history.append(last_record)
             record2.update_board(board2.convert())

@@ -25,7 +25,7 @@ def run_test() :
     })
     try    : my_module = code_manager.import_from_path(my_filename)
     except : 
-        os.remove(my_filename)
+        os.remove(my_filename)  
         return json.dumps({
             'my_error' : ErrorCode.CompileError,
             'my_error_msg' : ErrorMsg.CodeSubmit[ErrorCode.CompileError]
@@ -70,21 +70,11 @@ def run_test() :
     # AT LEAST, WE GOT OUR OWN FLEET
 
     playresult = game.play(fleet, fleet, my_module, enemy_module)
-    if not playresult['errorcode'] :
-        return json.dumps({
-            'my_error'      : 0,
-            'enemy_error'   : 0,
-            'game_error'    : 0,
-            'game_error_msg': playresult['errormsg'], #ErrorMsg.CodeSubmit[playresult['errorcode']],
-            'game_log'      : playresult['result'].get_log(False),
-            'description'   : playresult['description']
-        })
-    else :
-        return json.dumps({
-            'my_error'      : 0,
-            'enemy_error'   : 0,
-            'game_error'    : playresult['errorcode'],
-            'game_error_msg': playresult['errormsg'], #ErrorMsg.CodeSubmit[playresult['errorcode']],
-            'game_log'      : playresult['result'].get_log(False),
-            'description'   : playresult['description']
-        })
+    return json.dumps({
+        'my_error'      : 0,
+        'enemy_error'   : 0,
+        'game_error'    : 0,
+        'game_error_msg': playresult['errormsg'], #ErrorMsg.CodeSubmit[playresult['errorcode']],
+        'game_log'      : playresult['result'].get_log(False),
+        'description'   : playresult['description']
+    })
