@@ -55,6 +55,12 @@ def static_analysis(pystr) :
 	if bool(re.search('('+'|'.join(unexpected_functions)+')[ \t]*\(.*\)', pystr)) :
 		return {'code' : '', 'errorcode' : ErrorCode.InputFuncNA }
 
+	# Detect Unexpected module import
+	if bool(re.search('(from|import)[ \t]+.*sys', pystr)) :
+		return {'code' : '', 'errorcode' : ErrorCode.ImportNA_SYS }
+	if bool(re.search('(from|import)[ \t]+.*os', pystr)) :
+		return {'code' : '', 'errorcode' : ErrorCode.ImportNA_OS }
+
 	# return code
 	begin, end, = match.start(0), match.end(0)
 	code = pystr[:begin] + '@timeout_sec(4)\n' + pystr[begin:]#end] + '    global THREAD_ACTIVE\n' + pystr[end:]

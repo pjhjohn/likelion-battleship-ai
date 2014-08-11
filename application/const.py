@@ -48,13 +48,15 @@ ErrorCode = attrdict_const(
 	GuessNotDef  = 2,
 	RecursionNA	 = 3,
 	InputFuncNA	 = 4,
-	RuntimeError = 5,
-	TimeoutError = 6,
-	ImportError  = 7,
-	CompileError = 8,
-	Player1LostWithError = 9,
-	Player2LostWithError = 10,
-	SyntaxError  = 11	
+	ImportNA_SYS = 5,
+	ImportNA_OS  = 6,
+	RuntimeError = 7,
+	TimeoutError = 8,
+	ImportError  = 9,
+	CompileError = 10,
+	Player1LostWithError = 11,
+	Player2LostWithError = 12,
+	SyntaxError  = 13
 )
 ErrorMsg = attrdict_const(
 	CodeSubmit = [
@@ -63,13 +65,15 @@ ErrorMsg = attrdict_const(
 		'Function Not Definded : guess',					# 2
 		'Recursion Not Allowed : guess',					# 3
 		'Input Functions Not Allowed',						# 4
-		'Runtime Error',									# 5
-		'Timeout Error',									# 6
-		'Import Error',										# 7	
-		'Compile Error',									# 8	
-		"Error from Your ( Player1's ) Code",				# 9
-		"Error from Player2's Code",						# 10
-		'Syntax Error',										# 11
-		'Unexpected Error'									# 12
+		'Not Allowed Module : sys',							# 5
+		'Not Allowed Module : os',							# 6
+		'Runtime Error',									# 7
+		'Timeout Error',									# 8
+		'Import Error',										# 9	
+		'Compile Error',									# 10	
+		"Error from Your ( Player1's ) Code",				# 11
+		"Error from Player2's Code",						# 12
+		'Syntax Error',										# 13
+		'Unexpected Error'									# 14
 	]
 )
