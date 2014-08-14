@@ -44,10 +44,11 @@
 		<div class="row">
 			<h3>History</h3>
 			<p>폭격 로그 정보를 담고 있습니다. 히스토리의 각 정보들은 다음과 같은 dictionary 타입으로 저장되어 있습니다. guess의 입력값인 record를 통해 얻을 수 있습니다.
-			{<br>
-			    "guess" : { "x": [추측한 x좌표],"y": [추측한 y좌표]},<br>
-			    "result": [공격의 관한 결과값],<br>
-			    "sink"  : [침몰한 함선의 ID]<br>
+			<h4>log</h4>
+			<br>{<br>
+			    &nbsp;&nbsp;&nbsp;&nbsp;"guess" : { "x": [추측한 x좌표],"y": [추측한 y좌표]},<br>
+			    &nbsp;&nbsp;&nbsp;&nbsp;"result": [공격의 관한 결과값],<br>
+			    &nbsp;&nbsp;&nbsp;&nbsp;"sink"  : [침몰한 함선의 ID]<br>
 				}<br>
 	</div>
 			<div class="row">
@@ -120,23 +121,23 @@
 			<h3>API</h3>
 			<p>
 			guess 함수의 입력값인 record를 통해 접근할 수 있음.<br>
-			사용법 : record.function_name([parameter1, [parameter2, [...]]])
+			<h3>사용법 : record.function_name(parameters)</h3>
 			</p>
 			<ul>
 				<li>
 					<div>
-						<h4>get_lateset()</h4>
-						<p>가장 최근의 result를 반환</p>
+						<h4>get_latest()</h4>
+						<p>가장 최근의 log를 반환</p>
 						<p><strong>parameter </strong>없음</p>
-						<p><strong>return    </strong>(dic) result if exist else {}</p>
+						<p><strong>return    </strong>(dic) log if exist else {}</p>
 					</div>
 				</li>
 				<li>
 					<div>
 						<h4>get_history_at(index[, direction = 'FORWARD'])</h4>
-						<p>현재까지의 results 중 해당 index의 result를 반환. direction 이 FORWARD일 경우엔 처음부터 index번째의, BACKWORD일 경우엔 마지막부터 index번째의 result 를 반환한다.</p>
-						<p><strong>parameter </strong>(int) index, (FORWARD||BACKWORD) direction</p>
-						<p><strong>return    </strong>(dic) result</p>
+						<p>현재까지의 log들 중 해당 index의 log를 반환. direction 이 FORWARD일 경우엔 처음부터 index번째의, BACKWARD일 경우엔 마지막부터 index번째의 log를 반환한다.</p>
+						<p><strong>parameter </strong>(int) index, (FORWARD||BACKWARD) direction</p>
+						<p><strong>return    </strong>(dic) log</p>
 					</div>
 				</li>
 				<li>

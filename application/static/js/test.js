@@ -40,7 +40,6 @@ function run_test(data){
 			return with_toast(response['game_error_msg'],'error');
 		}
 		// response['my_error'] == response['enemy_error'] == response['game_error'] = 0(False)
-		console.log(response)
 		game_history = response['game_log']['history'];
 		latest_log = game_history[game_history.length - 1];
 		if (latest_log['player'] == 1){

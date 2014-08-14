@@ -249,6 +249,9 @@
 		var bombPlayer = 0;
 		var bombScene = new THREE.Scene();
 
+		var sinkSound = new Audio("../static/audio/sink.mp3");
+		var played = false;
+
 		var binded = 0;
 		var logNum = 0;
 		var completed = false;
@@ -510,6 +513,10 @@
 					$('#loadContents').fadeOut(1000);
 					$(document).keydown(function(e){
 						if(e.keyCode == '32'){
+						    if (played) {
+    						    //sinkSound.load();
+    						    played = false;
+						    }
 							//console.log(logs[logNum]);
 							var player = logs[logNum].player;
 							//console.log(player);
@@ -520,12 +527,53 @@
 								makeBomb(bombX, bombZ, player);
 								bombTime = 1;
 								changeBoardColor(logs[logNum].guess.x + 1, logs[logNum].guess.y + 1,'red',player);
+								if(logs[logNum].sink){
+								    
+    								sinkSound.play();
+    								var t = setTimeout(function(){sinkSound.load();},3000);
+    								played = true;
+								}
+								else{
+    								//var hitSound = new Audio("../static/audio/hit.mp3");
+    								//hitSound.play();
+								}
 							}
 							else if(logs[logNum].result == 0){
 								changeBoardColor(logs[logNum].guess.x + 1,logs[logNum].guess.y + 1,'black',player)
 							}
 							logNum++;
 						}
+					});
+					
+					$(document).click(function(){
+    					//console.log(logs[logNum]);
+    					    if (played) {
+    						    //sinkSound.load();
+    						    played = false;
+						    }
+							var player = logs[logNum].player;
+							//console.log(player);
+							if(logs[logNum].result > 0){
+								bombX = logs[logNum].guess.x + 1;
+								bombZ = logs[logNum].guess.y + 1;
+								bombPlayer = player;
+								makeBomb(bombX, bombZ, player);
+								bombTime = 1;
+								changeBoardColor(logs[logNum].guess.x + 1, logs[logNum].guess.y + 1,'red',player);
+								if(logs[logNum].sink){
+    								sinkSound.play();
+    								var t = setTimeout(function(){sinkSound.load();},3000);
+    								played = true;
+								}
+								else{
+    								//var hitSound = new Audio("../static/audio/hit.mp3");
+    								//hitSound.play();
+								}
+							}
+							else if(logs[logNum].result == 0){
+								changeBoardColor(logs[logNum].guess.x + 1,logs[logNum].guess.y + 1,'black',player)
+							}
+							logNum++;
 					});
 					binded=true;
 				}

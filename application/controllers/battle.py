@@ -47,7 +47,10 @@ def new_league(school_id) :
         user_data = {}
         user_data[Key.USER_ID] = user[Col.ID]
         user_data[Key.AI_MODULE] = code_manager.get_latest_code_module(user_data[Key.USER_ID])
-        user_data[Key.FLEET_DEPLOYMENT] = fleet_manager.get_latest_fleet(user_data[Key.USER_ID])
+        try:
+            user_data[Key.FLEET_DEPLOYMENT] = fleet_manager.get_latest_fleet(user_data[Key.USER_ID])
+        except:
+            continue
         if not user_data[Key.AI_MODULE]:
             print "no module"
             continue
