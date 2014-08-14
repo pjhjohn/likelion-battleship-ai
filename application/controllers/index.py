@@ -6,4 +6,6 @@ from application.lib.auth import *
 def index() :
 	if not is_login() :
 		return redirect(url_for('login'))
-	return render_template('index.html')
+		
+	api = render_template('api.html')
+	return render_template('index.html', api = api)

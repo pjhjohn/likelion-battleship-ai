@@ -38,22 +38,25 @@ class Record :
         remaining = [1, 2, 3, 4, 5]
         for record in self.history :
             if record['result'] == 2 :
-                remaining.remove(result['sink'])
+                remaining.remove(record['sink'])
         return remaining
 
-    def get_sink_info(self, ship_id=None) : 
-        sinks = []
-        for record in self.history :
-            if record['result'] == 2 :
-                sinks.append({'location' : record['guess'], 'sink' : record['sink']})
-        if ship_id == None :
-            return sinks
-        elif type(ship_id) == int and 0 < ship_id < 5 :
-            for sink in sinks :
-                if record['sink'] == ship_id :
+    def get_sink_info(self, ship_id=None) :
+        sink_list = []
+        for log in self.history :
+            if log['result'] == Record.Status.SINK :
+                sink_list.append({'location' : log['guess'], 'sink' : log['sink']})
+        if ship_id == None : return sink_list
+
+        if type(ship_id) == int and ship_id in [1, 2, 3, 4, 5] :
+            for sink in sink_list :
+                if sink['sink'] == ship_id :
                     return dict(sink['location'])
+            else : return {}
         else :
-            return {}
+            if not type(ship_id) == int : raise ValueError('ship_id should be int type. Current ship_id has %s type' % str(type(ship_id)))
+            elif ship_id not in [1, 2, 3, 4, 5] : raise ValueError('ship_id should be in range of [1, 2, 3, 4, 5]. Current ship_id is %d' % ship_id)
+            else : raise ValueError('Unexpected ship_id value')
     # API ENDS
 
     def update_board(self, board ):

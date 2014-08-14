@@ -9,7 +9,8 @@ import json, os
 
 @app.route('/test')
 def test() :
-    return render_template('test.html', current = request.path[1:])
+    api = render_template('api.html')
+    return render_template('test.html', api=api, current = request.path[1:])
 
 @app.route('/run_test', methods = ['POST'])
 def run_test() :
