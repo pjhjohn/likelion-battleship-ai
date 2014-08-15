@@ -62,9 +62,6 @@ function run_test(data){
 		hide_progress();
 		$("#btn-form-submit").removeAttr('disabled');
 	}).fail(function(xhr, status, error){
-		console.log(xhr)
-		console.log(status)
-		console.log(error)
 		show_toast('Error Has Occured from Server', 'error');
 	});
 }

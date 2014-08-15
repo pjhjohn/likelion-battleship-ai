@@ -2,3 +2,5 @@
 bugreport/*
 uploads/*
 application/static/logs/*
+run.py
+application/models/battleship_db.py

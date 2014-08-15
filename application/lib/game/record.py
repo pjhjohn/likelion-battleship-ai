@@ -13,9 +13,8 @@ class Record :
         else :
             return {}
 
-    def get_history(self) : 
-        #print list(self.history)
-        return list(self.history)
+    def get_history(self) :
+        return list(self.history) 
 
     def get_history_at(self, index, direction='FORWARD') :
         if 0 <= index < len(self.history) :
@@ -47,16 +46,15 @@ class Record :
             if log['result'] == Record.Status.SINK :
                 sink_list.append({'location' : log['guess'], 'sink' : log['sink']})
         if ship_id == None : return sink_list
-
-        if type(ship_id) == int and ship_id in [1, 2, 3, 4, 5] :
+        if type(ship_id) == int and ship_id in [1,2,3,4,5] :
             for sink in sink_list :
                 if sink['sink'] == ship_id :
                     return dict(sink['location'])
             else : return {}
         else :
-            if not type(ship_id) == int : raise ValueError('ship_id should be int type. Current ship_id has %s type' % str(type(ship_id)))
-            elif ship_id not in [1, 2, 3, 4, 5] : raise ValueError('ship_id should be in range of [1, 2, 3, 4, 5]. Current ship_id is %d' % ship_id)
-            else : raise ValueError('Unexpected ship_id value')
+            if not type(ship_id) == int     : raise ValueError('ship_id should be int type. Current ship_id has %s type' % str(type(ship_id)))
+            elif ship_id not in [1,2,3,4,5] : raise ValueError('ship_id should be in range of [1, 2, 3, 4, 5]. Current ship_id is %d' % ship_id)
+            else : raise ValueError('Unexpected ship_id and value')
     # API ENDS
 
     def update_board(self, board ):
